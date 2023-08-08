@@ -10,36 +10,40 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/utils";
-import { type Project } from "@prisma/client";
+import { api } from "@/utils/api";
 import { CheckIcon, ChevronsUpDownIcon, PlusIcon } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useMemo } from "react";
-
-const projects: Project[] = [];
+import { Skeleton } from "./ui/skeleton";
 
 export default function ProjectSwitcher() {
   const { data } = useSession();
   const router = useRouter();
   const [, setCreateProjectModalOpen, CreateProjectModal] =
     useCreateProjectModal();
+  const projects = api.projects.getAll.useQuery();
 
   const currentProject = useMemo(
     () =>
       typeof router.query.project_slug === "string"
-        ? projects.find((item) => item.slug === router.query.project_slug)
+        ? projects.data?.find((item) => item.slug === router.query.project_slug)
         : null,
-    [router.query.project_slug]
+    [projects.data, router.query.project_slug]
   );
-
-  // if (isLoading || !data) {
-  //   return <Skeleton className="-mx-2 h-10 w-32" />;
-  // }
 
   if (!data) {
     return null;
+  }
+
+  if (projects.isLoading) {
+    return <Skeleton className="-mx-2 h-10 w-32" />;
+  }
+
+  if (projects.isError) {
+    return <p>Error!</p>;
   }
 
   return (
@@ -62,7 +66,7 @@ export default function ProjectSwitcher() {
             <ChevronsUpDownIcon size={20} className="ml-2" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent>
+        <DropdownMenuContent className="w-48">
           <DropdownMenuGroup>
             <DropdownMenuLabel>Personal Account</DropdownMenuLabel>
             <DropdownMenuItem asChild>
@@ -89,7 +93,7 @@ export default function ProjectSwitcher() {
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuLabel>My Chabots</DropdownMenuLabel>
-            {projects.map((item) => (
+            {projects.data.map((item) => (
               <DropdownMenuItem key={item.id} asChild>
                 <Link href={`/dashboard/${item.slug}`}>
                   <Image

@@ -15,35 +15,18 @@ import {
   FormMessage,
 } from "../ui/form";
 import { useForm } from "react-hook-form";
-import {
-  type CreateProjectSchemaData,
-  createProjectSchema,
-} from "@/lib/validations";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useCallback, useState } from "react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { useToast } from "../ui/use-toast";
-import { useRouter } from "next/navigation";
-import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/router";
 import { type UseModalReturning } from "./types";
-import { useSession } from "next-auth/react";
-import { Project } from "@prisma/client";
-
-const createProjectFn = async (data: CreateProjectSchemaData) => {
-  // const res = await fetch("/api/projects", {
-  //   method: "POST",
-  //   body: JSON.stringify(data),
-  //   headers: {
-  //     "Content-Type": "application/json",
-  //   },
-  // });
-  // const body: ApiResponse<Project> = await res.json();
-  // if (!body.success) {
-  //   throw body.error;
-  // }
-  // return body.data;
-};
+import { api } from "@/utils/api";
+import {
+  type CreateProjectSchemaData,
+  createProjectSchema,
+} from "@/lib/validations";
 
 export function CreateProjectModal({
   open,
@@ -52,41 +35,29 @@ export function CreateProjectModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: session } = useSession();
   const form = useForm<CreateProjectSchemaData>({
     resolver: zodResolver(createProjectSchema),
     defaultValues: {
       name: "",
-      description: "",
       slug: "",
     },
   });
   const { toast } = useToast();
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const utils = api.useContext();
 
-  const handleSubmit = useCallback(
-    async (data: CreateProjectSchemaData) => {
-      // try {
-      //   const project = await createProjectFn(data);
-      //   queryClient.setQueryData<Project[]>(
-      //     ["projects", session?.user.id],
-      //     (projects) => (projects ? [...projects, project] : [project]),
-      //   );
-      //   router.refresh();
-      //   router.push(`/dashboard/${project.slug}`);
-      //   onOpenChange(false);
-      //   toast({ title: "Project created successfully!" });
-      // } catch (error) {
-      //   toast({
-      //     title:
-      //       typeof error === "string" ? error : "Failed to create project!",
-      //     variant: "destructive",
-      //   });
-      // }
+  const createProject = api.projects.create.useMutation({
+    onSuccess: async (data) => {
+      await utils.projects.getAll.invalidate();
+      toast({ title: "Project Created" });
+      router.push(`/dashboard/${data.slug}`);
     },
-    [onOpenChange, queryClient, router, session?.user.id, toast]
-  );
+    onError: (error) => {
+      toast({ title: error.message || "Failed to create Proejct" });
+    },
+  });
+
+  const handleSubmit = form.handleSubmit((data) => createProject.mutate(data));
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -95,7 +66,7 @@ export function CreateProjectModal({
           <DialogTitle>Create Project</DialogTitle>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
               <FormField
                 control={form.control}
@@ -134,12 +105,7 @@ export function CreateProjectModal({
               >
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={
-                  !form.formState.isDirty || form.formState.isSubmitting
-                }
-              >
+              <Button type="submit" disabled={form.formState.isSubmitting}>
                 {form.formState.isSubmitting && (
                   <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
                 )}

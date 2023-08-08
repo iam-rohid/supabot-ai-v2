@@ -3,13 +3,14 @@ import ThemeSwitcher from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
 import UserButton from "@/components/user-button";
 import { type MenuItem } from "@/types/menu-item";
-import { cn } from "@/utils";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { type ReactNode } from "react";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
-  const { query } = useRouter();
+  const {
+    query: { project_slug },
+  } = useRouter();
   return (
     <>
       <header className="sticky top-0 z-20 border-b bg-card text-card-foreground">
@@ -19,7 +20,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
               <div className="h-10 w-10 rounded-full bg-accent-foreground" />
             </Link>
           </Button>
-          <span className="mx-4 text-2xl text-muted-foreground/50">/</span>
+          <div className="mx-4 h-6 w-px rotate-12 bg-border" />
           <ProjectSwitcher />
           <div className="flex flex-1 items-center justify-end gap-4">
             <ThemeSwitcher />
@@ -28,19 +29,19 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         </div>
         <NavBar
           menuList={
-            typeof query.project_slug === "string"
+            typeof project_slug === "string"
               ? [
                   {
-                    href: `/dashboard/${query.project_slug}`,
+                    href: `/dashboard/${project_slug}`,
                     label: "Overview",
                     end: true,
                   },
                   {
-                    href: `/dashboard/${query.project_slug}/links`,
+                    href: `/dashboard/${project_slug}/links`,
                     label: "Links",
                   },
                   {
-                    href: `/dashboard/${query.project_slug}/settings`,
+                    href: `/dashboard/${project_slug}/settings`,
                     label: "Settings",
                   },
                 ]
@@ -66,7 +67,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 export default DashboardLayout;
 
 function NavBar({ menuList }: { menuList: MenuItem[] }) {
-  const router = useRouter();
+  const { asPath } = useRouter();
   if (menuList.length === 0) {
     return null;
   }
@@ -74,15 +75,10 @@ function NavBar({ menuList }: { menuList: MenuItem[] }) {
     <div className="container flex items-center">
       {menuList.map((item, i) => {
         const active = item.end
-          ? router.pathname === item.href
-          : router.pathname.startsWith(item.href);
+          ? asPath === item.href
+          : asPath.startsWith(item.href);
         return (
-          <div
-            key={i}
-            className={cn("relative inline pb-2", {
-              "-ml-3": i === 0,
-            })}
-          >
+          <div key={i} className="relative inline pb-2 first:-ml-3">
             <Button asChild variant="ghost" size="sm">
               <Link href={item.href}>{item.label}</Link>
             </Button>

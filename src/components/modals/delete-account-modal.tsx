@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useState } from "react";
 import {
   Dialog,
@@ -9,27 +7,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { APP_NAME } from "@/lib/constants";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
-import { ApiErrorResponse } from "@/lib/types";
 import { useToast } from "../ui/use-toast";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
-import { UseModalReturning } from "./types";
+import { APP_NAME } from "@/utils/constants";
+import { type UseModalReturning } from "./types";
 
-const deleteAccountFn = async () => {
-  const res = await fetch("/api/users", {
-    method: "DELETE",
-  });
-  const body: ApiErrorResponse = await res.json();
-  if (!body.success) {
-    throw body.error;
-  }
-};
 const VERIFY_TEXT = "confirm delete account";
 
 export function DeleteAccountModal({
@@ -47,25 +35,25 @@ export function DeleteAccountModal({
   const { update } = useSession();
 
   const handleDelete = useCallback(async () => {
-    if (isDeleting || !(verifyText === VERIFY_TEXT)) {
-      return;
-    }
-    setIsDeleting(true);
-    try {
-      await deleteAccountFn();
-      toast({ title: "Account deleted successfully!" });
-      await update();
-      queryClient.clear();
-      router.refresh();
-      router.push("/signin");
-    } catch (error) {
-      setIsDeleting(false);
-      toast({
-        title: typeof error === "string" ? error : "Failed to delete account!",
-        variant: "destructive",
-      });
-    }
-  }, [isDeleting, verifyText, toast, update, queryClient, router]);
+    // if (isDeleting || !(verifyText === VERIFY_TEXT)) {
+    //   return;
+    // }
+    // setIsDeleting(true);
+    // try {
+    //   await deleteAccountFn();
+    //   toast({ title: "Account deleted successfully!" });
+    //   await update();
+    //   queryClient.clear();
+    //   router.refresh();
+    //   router.push("/signin");
+    // } catch (error) {
+    //   setIsDeleting(false);
+    //   toast({
+    //     title: typeof error === "string" ? error : "Failed to delete account!",
+    //     variant: "destructive",
+    //   });
+    // }
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -112,7 +100,7 @@ export const useDeleteAccountModal = (): UseModalReturning => {
 
   const Modal = useCallback(
     () => <DeleteAccountModal open={open} onOpenChange={setOpen} />,
-    [open],
+    [open]
   );
 
   return [open, setOpen, Modal];

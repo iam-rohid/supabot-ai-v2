@@ -1,5 +1,5 @@
 import Link, { type LinkProps } from "next/link";
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
 import { forwardRef, useEffect, useState } from "react";
 
 export type NavLinkProps = Omit<
@@ -21,15 +21,13 @@ const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(
     ref
   ) => {
     const [isActive, setIsActive] = useState(false);
-    const pathname = usePathname();
+    const { asPath } = useRouter();
 
     useEffect(() => {
       setIsActive(
-        end
-          ? pathname === href.toString()
-          : pathname.startsWith(href.toString())
+        end ? asPath === href.toString() : asPath.startsWith(href.toString())
       );
-    }, [end, href, pathname]);
+    }, [end, href, asPath]);
 
     return (
       <Link

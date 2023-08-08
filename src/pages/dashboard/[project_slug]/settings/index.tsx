@@ -1,10 +1,22 @@
 import SettingsLayout from "@/layouts/settings-layout";
 import { getServerAuthSession } from "@/server/auth";
 import { type NextPageWithLayout } from "@/types/next";
+import { api } from "@/utils/api";
 import { type GetServerSideProps } from "next";
+import { useRouter } from "next/router";
 
 const Page: NextPageWithLayout = () => {
-  return <div>General Settings</div>;
+  const {
+    query: { project_slug },
+  } = useRouter();
+  const project = api.projects.getBySlug.useQuery({
+    slug: project_slug as string,
+  });
+  return (
+    <>
+      <pre>{JSON.stringify(project.data, null, 2)}</pre>
+    </>
+  );
 };
 
 Page.getLayout = (page) => <SettingsLayout>{page}</SettingsLayout>;

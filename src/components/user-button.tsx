@@ -12,7 +12,7 @@ import { LogOutIcon, SettingsIcon } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { Skeleton } from "./ui/skeleton";
 
 export default function UserButton() {

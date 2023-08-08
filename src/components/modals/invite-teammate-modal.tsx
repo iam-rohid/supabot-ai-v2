@@ -1,7 +1,5 @@
-"use client";
-
 import { useCallback, useState } from "react";
-import { UseModalReturning } from "./types";
+import { type UseModalReturning } from "./types";
 import {
   Dialog,
   DialogContent,
@@ -24,7 +22,7 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
 
 const inviteSchema = z.object({
@@ -50,28 +48,8 @@ export default function InviteTeammateMoal({
   const router = useRouter();
 
   const handleSubmit = useCallback(
-    async (data: z.infer<typeof inviteSchema>) => {
-      // try {
-      //   const res = await fetch(`/api/projects/${projectSlug}/invitations`, {
-      //     method: "POST",
-      //     body: JSON.stringify(data),
-      //   });
-      //   const resData = (await res.json()) as ApiResponse<ProjectInvitation>;
-      //   if (!resData.success) {
-      //     throw resData.error;
-      //   }
-      //   toast({ title: "Invitations sent" });
-      //   router.refresh();
-      //   onOpenChange(false);
-      // } catch (error) {
-      //   toast({
-      //     title:
-      //       typeof error === "string" ? error : "Failed to send invitation",
-      //     variant: "destructive",
-      //   });
-      // }
-    },
-    [onOpenChange, projectSlug, router, toast]
+    async (data: z.infer<typeof inviteSchema>) => {},
+    []
   );
 
   return (

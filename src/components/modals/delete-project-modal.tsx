@@ -1,8 +1,6 @@
-"use client";
-
 import { useCallback, useState } from "react";
 import { useToast } from "../ui/use-toast";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import {
   Dialog,
   DialogContent,
@@ -19,16 +17,6 @@ import { Loader2 } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { type UseModalReturning } from "./types";
 import { useSession } from "next-auth/react";
-
-const deleteProjectFn = async (slug: string) => {
-  // const res = await fetch(`/api/projects/${slug}`, {
-  //   method: "DELETE",
-  // });
-  // const body: ApiErrorResponse = await res.json();
-  // if (!body.success) {
-  //   throw body.error;
-  // }
-};
 
 const VERIFY_MESSAGE = "confirm delete project";
 
@@ -75,16 +63,7 @@ export function DeleteProjectModal({
     //     variant: "destructive",
     //   });
     // }
-  }, [
-    isDeleting,
-    projectSlugText,
-    projectSlug,
-    verifyText,
-    queryClient,
-    session?.user.id,
-    router,
-    toast,
-  ]);
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
