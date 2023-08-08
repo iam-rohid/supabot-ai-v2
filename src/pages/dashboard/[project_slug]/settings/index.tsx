@@ -1,3 +1,6 @@
+import DeleteProjectForm from "@/components/forms/delete-project-form";
+import UpdateProjecNameForm from "@/components/forms/update-project-name-form";
+import UpdateProjectSlugForm from "@/components/forms/update-project-slug-form";
 import SettingsLayout from "@/layouts/settings-layout";
 import { getServerAuthSession } from "@/server/auth";
 import { type NextPageWithLayout } from "@/types/next";
@@ -12,10 +15,22 @@ const Page: NextPageWithLayout = () => {
   const project = api.project.getBySlug.useQuery({
     slug: project_slug as string,
   });
+  if (project.isLoading) {
+    return <p>Loading...</p>;
+  }
+  if (project.isError) {
+    return <p>Error</p>;
+  }
+  if (!project.data) {
+    return <p>Project not found!</p>;
+  }
+
   return (
-    <>
-      <pre>{JSON.stringify(project.data, null, 2)}</pre>
-    </>
+    <div className="grid gap-8">
+      <UpdateProjecNameForm project={project.data} />
+      <UpdateProjectSlugForm project={project.data} />
+      <DeleteProjectForm project={project.data} />
+    </div>
   );
 };
 

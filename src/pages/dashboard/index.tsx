@@ -1,7 +1,13 @@
 import { useCreateProjectModal } from "@/components/modals/create-project-modal";
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import DashboardLayout from "@/layouts/dashboard-layout";
 import { getServerAuthSession } from "@/server/auth";
 import { type NextPageWithLayout } from "@/types/next";
@@ -61,9 +67,13 @@ const Page: NextPageWithLayout = () => {
             ))}
           </div>
         ) : (
-          <Card className="text-center">
+          <Card className="mx-auto max-w-screen-md text-center">
             <CardHeader>
-              <CardTitle>You don&apos;t have any projects yet!</CardTitle>
+              <CardTitle>You haven&apos;t created any projects yet!</CardTitle>
+              <CardDescription>
+                Click on the Create a Project button below to create your first
+                super chat bot.
+              </CardDescription>
             </CardHeader>
             <CardFooter className="justify-center">
               <Button onClick={createNewProject}>Create a Project</Button>

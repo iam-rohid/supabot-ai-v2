@@ -1,6 +1,5 @@
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useToast } from "../ui/use-toast";
-import { useRouter } from "next/router";
 import {
   Dialog,
   DialogContent,
@@ -9,58 +8,76 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";
-import { useQueryClient } from "@tanstack/react-query";
 import { type UseModalReturning } from "./types";
-import { useSession } from "next-auth/react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { api } from "@/utils/api";
+import { type Project } from "@prisma/client";
+import { useRouter } from "next/router";
 
-const VERIFY_MESSAGE = "confirm delete project";
+const VERIFY_TEXT = "confirm delete project";
 
 export function DeleteProjectModal({
   open,
   onOpenChange,
-  projectSlug,
+  project,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectSlug: string;
+  project: Project;
 }) {
-  const [projectSlugText, setProjectSlugText] = useState("");
-  const [verifyText, setVerifyText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
-  const { toast } = useToast();
+  const schema = useMemo(
+    () =>
+      z.object({
+        text: z.literal(VERIFY_TEXT),
+        slug: z.literal(project.slug),
+      }),
+    [project.slug]
+  );
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+  });
 
-  const handleDelete = useCallback(async () => {
-    // if (
-    //   isDeleting ||
-    //   !(projectSlugText === projectSlug && verifyText === VERIFY_MESSAGE)
-    // ) {
-    //   return;
-    // }
-    // setIsDeleting(true);
-    // try {
-    //   await deleteProjectFn(projectSlug);
-    //   queryClient.setQueryData<Project[]>(
-    //     ["projects", session?.user.id],
-    //     (projects) =>
-    //       projects ? projects.filter((bot) => bot.slug !== projectSlug) : [],
-    //   );
-    //   router.refresh();
-    //   router.push("/dashboard");
-    //   toast({ title: "Project deleted successfully!" });
-    //   setIsDeleting(false);
-    // } catch (error) {
-    //   setIsDeleting(false);
-    //   toast({
-    //     title: typeof error === "string" ? error : "Failed to delete project!",
-    //     variant: "destructive",
-    //   });
-    // }
-  }, []);
+  const { toast } = useToast();
+  const router = useRouter();
+  const utils = api.useContext();
+
+  const deleteProject = api.project.delete.useMutation({
+    onSuccess: () => {
+      utils.project.getAll.invalidate();
+      toast({ title: "Project deleted" });
+      onOpenChange(false);
+      router.push("/dashboard");
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete account",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleDelete = form.handleSubmit((data) => {
+    if (data.slug !== project.slug) {
+      form.setError("slug", { message: "Slug didn't matched" });
+      return;
+    }
+    deleteProject.mutate({ id: project.id });
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -72,54 +89,68 @@ export function DeleteProjectModal({
             respective stats.
           </DialogDescription>
         </DialogHeader>
-        <div className="grid gap-6">
-          <fieldset className="grid gap-2">
-            <Label htmlFor="verify">
-              Enter the project slug <strong>{projectSlug}</strong> to continue
-            </Label>
-            <Input
-              value={projectSlugText}
-              onChange={(e) => setProjectSlugText(e.currentTarget.value)}
+        <Form {...form}>
+          <form onSubmit={handleDelete} className="space-y-6">
+            <FormField
+              control={form.control}
+              name="slug"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Enter the project slug <strong>{project.slug}</strong> to
+                    continue
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </fieldset>
-          <fieldset className="grid gap-2">
-            <Label htmlFor="verify">
-              To verify, type <strong>{VERIFY_MESSAGE}</strong> below
-            </Label>
-            <Input
-              value={verifyText}
-              onChange={(e) => setVerifyText(e.currentTarget.value)}
+
+            <FormField
+              control={form.control}
+              name="text"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    To verify, type <strong>{VERIFY_TEXT}</strong> below
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </fieldset>
-        </div>
-        <DialogFooter>
-          <DialogClose asChild>
-            <Button variant="ghost">Cancel</Button>
-          </DialogClose>
-          <Button
-            disabled={
-              isDeleting ||
-              !(
-                verifyText === VERIFY_MESSAGE && projectSlugText === projectSlug
-              )
-            }
-            onClick={handleDelete}
-          >
-            {isDeleting && (
-              <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-            )}
-            Delete Project
-          </Button>
-        </DialogFooter>
+
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="reset" variant="ghost">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                type="submit"
+                disabled={!form.formState.isValid || deleteProject.isLoading}
+              >
+                {deleteProject.isLoading && (
+                  <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
+                )}
+                Delete Project
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
 }
 
 export const useDeleteProjectModal = ({
-  projectSlug,
+  project,
 }: {
-  projectSlug: string;
+  project: Project;
 }): UseModalReturning => {
   const [open, setOpen] = useState(false);
 
@@ -128,10 +159,10 @@ export const useDeleteProjectModal = ({
       <DeleteProjectModal
         open={open}
         onOpenChange={setOpen}
-        projectSlug={projectSlug}
+        project={project}
       />
     ),
-    [projectSlug, open]
+    [project, open]
   );
 
   return [open, setOpen, Modal];

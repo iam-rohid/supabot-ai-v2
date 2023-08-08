@@ -27,6 +27,7 @@ import {
   type CreateProjectSchemaData,
   createProjectSchema,
 } from "@/lib/validations";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 export function CreateProjectModal({
   open,
@@ -50,6 +51,7 @@ export function CreateProjectModal({
     onSuccess: async (data) => {
       await utils.project.getAll.invalidate();
       toast({ title: "Project Created" });
+      onOpenChange(false);
       router.push(`/dashboard/${data.slug}`);
     },
     onError: (error) => {
@@ -98,15 +100,13 @@ export function CreateProjectModal({
             </div>
 
             <DialogFooter className="pt-6">
-              <Button
-                type="reset"
-                variant="ghost"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && (
+              <DialogClose asChild>
+                <Button type="reset" variant="ghost">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit" disabled={createProject.isLoading}>
+                {createProject.isLoading && (
                   <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
                 )}
                 Create Project

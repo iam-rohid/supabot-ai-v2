@@ -1,8 +1,17 @@
 import ProjectSwitcher from "@/components/project-switcher";
 import ThemeSwitcher from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import UserButton from "@/components/user-button";
 import { type MenuItem } from "@/types/menu-item";
+import { api } from "@/utils/api";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { type ReactNode } from "react";
@@ -59,7 +68,11 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           }
         />
       </header>
-      {children}
+      {typeof project_slug === "string" ? (
+        <ProtectProject projectSlug={project_slug}>{children}</ProtectProject>
+      ) : (
+        <>{children}</>
+      )}
     </>
   );
 };
@@ -91,3 +104,41 @@ function NavBar({ menuList }: { menuList: MenuItem[] }) {
     </div>
   );
 }
+
+const ProtectProject = ({
+  projectSlug,
+  children,
+}: {
+  projectSlug: string;
+  children: ReactNode;
+}) => {
+  const project = api.project.getBySlug.useQuery({ slug: projectSlug });
+  if (project.isLoading) {
+    return <p>Loading...</p>;
+  }
+  if (project.isError) {
+    return <p>Error</p>;
+  }
+  if (!project.data) {
+    return (
+      <Card className="mx-auto my-8 max-w-screen-md">
+        <CardHeader>
+          <CardTitle>Something went wrong!</CardTitle>
+          <CardDescription>
+            Either you don&apos;t have permissions to view this project or this
+            project doesn&apos;t exist. Refresh to try again.
+          </CardDescription>
+        </CardHeader>
+        <CardFooter>
+          <Button onClick={() => project.refetch()}>
+            {project.isRefetching && (
+              <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
+            )}
+            Refresh
+          </Button>
+        </CardFooter>
+      </Card>
+    );
+  }
+  return <>{children}</>;
+};

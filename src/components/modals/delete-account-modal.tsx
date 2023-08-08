@@ -26,6 +26,7 @@ import {
   FormMessage,
 } from "../ui/form";
 import { api } from "@/utils/api";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 const VERIFY_TEXT = "confirm delete account";
 
@@ -46,13 +47,20 @@ export function DeleteAccountModal({
     resolver: zodResolver(schema),
   });
 
+  const utils = api.useContext();
   const deleteUser = api.user.delete.useMutation({
     onSuccess: async () => {
+      utils.invalidate();
       await update();
       toast({ title: "User deleted" });
+      onOpenChange(false);
     },
     onError: (error) => {
-      toast({ title: error.message });
+      toast({
+        title: "Failed to delete account",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 
@@ -86,13 +94,11 @@ export function DeleteAccountModal({
               )}
             />
             <DialogFooter>
-              <Button
-                type="reset"
-                variant="ghost"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
+              <DialogClose asChild>
+                <Button type="reset" variant="ghost">
+                  Cancel
+                </Button>
+              </DialogClose>
               <Button
                 type="submit"
                 disabled={deleteUser.isLoading || !form.formState.isValid}
