@@ -18,6 +18,10 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  images: {
+    dangerouslyAllowSVG: true,
+    domains: ["avatars.githubusercontent.com"],
+  },
 };
 
 export default config;
