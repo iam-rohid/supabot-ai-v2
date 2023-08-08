@@ -46,9 +46,9 @@ export function CreateProjectModal({
   const router = useRouter();
   const utils = api.useContext();
 
-  const createProject = api.projects.create.useMutation({
+  const createProject = api.project.create.useMutation({
     onSuccess: async (data) => {
-      await utils.projects.getAll.invalidate();
+      await utils.project.getAll.invalidate();
       toast({ title: "Project Created" });
       router.push(`/dashboard/${data.slug}`);
     },

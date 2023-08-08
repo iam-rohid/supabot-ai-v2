@@ -33,9 +33,6 @@ export function DeleteProjectModal({
   const [verifyText, setVerifyText] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
-  const queryClient = useQueryClient();
-  const { data: session } = useSession();
 
   const handleDelete = useCallback(async () => {
     // if (

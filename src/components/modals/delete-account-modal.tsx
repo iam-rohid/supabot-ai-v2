@@ -8,17 +8,30 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { Button } from "../ui/button";
-import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/router";
-import { useQueryClient } from "@tanstack/react-query";
 import { useSession } from "next-auth/react";
 import { APP_NAME } from "@/utils/constants";
 import { type UseModalReturning } from "./types";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "../ui/form";
+import { api } from "@/utils/api";
 
 const VERIFY_TEXT = "confirm delete account";
+
+const schema = z.object({
+  text: z.literal(VERIFY_TEXT),
+});
 
 export function DeleteAccountModal({
   open,
@@ -27,33 +40,23 @@ export function DeleteAccountModal({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const [verifyText, setVerifyText] = useState("");
-  const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
-  const router = useRouter();
-  const queryClient = useQueryClient();
   const { update } = useSession();
+  const form = useForm<z.infer<typeof schema>>({
+    resolver: zodResolver(schema),
+  });
 
-  const handleDelete = useCallback(async () => {
-    // if (isDeleting || !(verifyText === VERIFY_TEXT)) {
-    //   return;
-    // }
-    // setIsDeleting(true);
-    // try {
-    //   await deleteAccountFn();
-    //   toast({ title: "Account deleted successfully!" });
-    //   await update();
-    //   queryClient.clear();
-    //   router.refresh();
-    //   router.push("/signin");
-    // } catch (error) {
-    //   setIsDeleting(false);
-    //   toast({
-    //     title: typeof error === "string" ? error : "Failed to delete account!",
-    //     variant: "destructive",
-    //   });
-    // }
-  }, []);
+  const deleteUser = api.user.delete.useMutation({
+    onSuccess: async () => {
+      await update();
+      toast({ title: "User deleted" });
+    },
+    onError: (error) => {
+      toast({ title: error.message });
+    },
+  });
+
+  const handleSubmit = form.handleSubmit(() => deleteUser.mutate());
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -65,31 +68,44 @@ export function DeleteAccountModal({
             {APP_NAME} links and their respective stats.
           </DialogDescription>
         </DialogHeader>
-        <div>
-          <fieldset className="grid gap-2">
-            <Label htmlFor="verify">
-              To verify, type <strong>{VERIFY_TEXT}</strong> below
-            </Label>
-            <Input
-              value={verifyText}
-              onChange={(e) => setVerifyText(e.currentTarget.value)}
+        <Form {...form}>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <FormField
+              control={form.control}
+              name="text"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    To verfiy, type <strong>{VERIFY_TEXT}</strong> below
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </fieldset>
-        </div>
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)}>
-            Cancel
-          </Button>
-          <Button
-            disabled={isDeleting || verifyText !== VERIFY_TEXT}
-            onClick={handleDelete}
-          >
-            {isDeleting && (
-              <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-            )}
-            Delete Account
-          </Button>
-        </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="reset"
+                variant="ghost"
+                onClick={() => onOpenChange(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={deleteUser.isLoading || !form.formState.isValid}
+                variant="destructive"
+              >
+                {deleteUser.isLoading && (
+                  <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
+                )}
+                Delete Account
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

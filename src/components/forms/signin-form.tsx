@@ -12,7 +12,6 @@ import { useToast } from "@/components/ui/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRightIcon, GithubIcon, Loader2Icon } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/router";
 import { useCallback, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,7 +26,6 @@ const SignInForm = () => {
     resolver: zodResolver(schema),
   });
   const [oauthSingInOpen, setOauthSingInOpen] = useState(false);
-  const router = useRouter();
   const callbackUrl = "/dashboard";
   const { toast } = useToast();
   const isLoading = useMemo(

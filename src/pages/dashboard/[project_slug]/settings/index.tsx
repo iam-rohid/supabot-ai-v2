@@ -9,7 +9,7 @@ const Page: NextPageWithLayout = () => {
   const {
     query: { project_slug },
   } = useRouter();
-  const project = api.projects.getBySlug.useQuery({
+  const project = api.project.getBySlug.useQuery({
     slug: project_slug as string,
   });
   return (

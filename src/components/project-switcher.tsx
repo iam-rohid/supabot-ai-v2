@@ -24,7 +24,7 @@ export default function ProjectSwitcher() {
   const router = useRouter();
   const [, setCreateProjectModalOpen, CreateProjectModal] =
     useCreateProjectModal();
-  const projects = api.projects.getAll.useQuery();
+  const projects = api.project.getAll.useQuery();
 
   const currentProject = useMemo(
     () =>

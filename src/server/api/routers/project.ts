@@ -2,7 +2,7 @@ import { createProjectSchema } from "@/lib/validations";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import { z } from "zod";
 
-export const projectsRouter = createTRPCRouter({
+export const projectRouter = createTRPCRouter({
   getAll: protectedProcedure.query(({ ctx }) =>
     ctx.prisma.project.findMany({
       where: { projectUsers: { some: { userId: ctx.session.user.id } } },

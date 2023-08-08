@@ -12,7 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 const Page: NextPageWithLayout = () => {
-  const projects = api.projects.getAll.useQuery();
+  const projects = api.project.getAll.useQuery();
   const [, setCreateProjectOpen, CreateProjectModal] = useCreateProjectModal();
 
   const createNewProject = () => setCreateProjectOpen(true);
