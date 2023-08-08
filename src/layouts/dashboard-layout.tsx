@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import UserButton from "@/components/user-button";
 import { type MenuItem } from "@/types/menu-item";
+import { cn } from "@/utils";
 import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -92,7 +93,14 @@ function NavBar({ menuList }: { menuList: MenuItem[] }) {
           : asPath.startsWith(item.href);
         return (
           <div key={i} className="relative inline pb-2 first:-ml-3">
-            <Button asChild variant="ghost" size="sm">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className={cn("text-muted-foreground", {
+                "text-accent-foreground": active,
+              })}
+            >
               <Link href={item.href}>{item.label}</Link>
             </Button>
             {active && (

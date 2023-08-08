@@ -37,14 +37,14 @@ const SettingsLayout = ({ children }: { children: ReactNode }) => {
     <DashboardLayout>
       <PageHeader title="Settings" />
       <main className="container flex items-start gap-8 py-8">
-        <div className="grid w-64 flex-shrink-0 gap-1">
+        <div className="sticky top-36 grid w-64 flex-shrink-0 gap-1">
           {items.map((item, i) => (
             <Button
               key={i}
               asChild
               variant="ghost"
               className={cn("justify-start text-left text-muted-foreground", {
-                "bg-secondary text-accent-foreground": item.end
+                "text-accent-foreground": item.end
                   ? asPath === item.href
                   : asPath.startsWith(item.href),
               })}
@@ -53,7 +53,7 @@ const SettingsLayout = ({ children }: { children: ReactNode }) => {
             </Button>
           ))}
         </div>
-        {children}
+        <div className="flex-1">{children}</div>
       </main>
     </DashboardLayout>
   );

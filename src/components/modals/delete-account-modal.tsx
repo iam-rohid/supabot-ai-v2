@@ -93,6 +93,7 @@ export function DeleteAccountModal({
                 </FormItem>
               )}
             />
+
             <DialogFooter>
               <DialogClose asChild>
                 <Button type="reset" variant="ghost">

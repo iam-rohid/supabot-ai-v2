@@ -55,7 +55,11 @@ export function CreateProjectModal({
       router.push(`/dashboard/${data.slug}`);
     },
     onError: (error) => {
-      toast({ title: error.message || "Failed to create Proejct" });
+      toast({
+        title: "Failed to create Proejct",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 

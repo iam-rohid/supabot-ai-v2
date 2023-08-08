@@ -53,7 +53,11 @@ export default function UpdateAccountEmailForm() {
       toast({ title: "Email update success" });
     },
     onError: (error) => {
-      toast({ title: error.message });
+      toast({
+        title: "Failed to update email",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 

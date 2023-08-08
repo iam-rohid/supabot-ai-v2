@@ -5,6 +5,7 @@ import GithubProvider from "next-auth/providers/github";
 import EmailProvider from "next-auth/providers/email";
 import { env } from "@/env.mjs";
 import { prisma } from "@/server/db";
+import { createHash } from "crypto";
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -60,4 +61,10 @@ export const getServerAuthSession = (ctx: {
   res: GetServerSidePropsContext["res"];
 }) => {
   return getServerSession(ctx.req, ctx.res, authOptions);
+};
+
+export const hashToken = (token: string) => {
+  return createHash("sha256")
+    .update(`${token}${process.env.NEXTAUTH_SECRET}`)
+    .digest("hex");
 };

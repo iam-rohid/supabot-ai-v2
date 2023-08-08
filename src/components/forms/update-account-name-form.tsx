@@ -52,7 +52,11 @@ export default function UpdateAccountNameForm() {
       toast({ title: "Name update success" });
     },
     onError: (error) => {
-      toast({ title: error.message });
+      toast({
+        title: "Failed to update name",
+        description: error.message,
+        variant: "destructive",
+      });
     },
   });
 

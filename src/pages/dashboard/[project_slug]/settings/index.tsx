@@ -1,6 +1,7 @@
 import DeleteProjectForm from "@/components/forms/delete-project-form";
 import UpdateProjecNameForm from "@/components/forms/update-project-name-form";
 import UpdateProjectSlugForm from "@/components/forms/update-project-slug-form";
+import { Skeleton } from "@/components/ui/skeleton";
 import SettingsLayout from "@/layouts/settings-layout";
 import { getServerAuthSession } from "@/server/auth";
 import { type NextPageWithLayout } from "@/types/next";
@@ -16,7 +17,13 @@ const Page: NextPageWithLayout = () => {
     slug: project_slug as string,
   });
   if (project.isLoading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="grid gap-8">
+        <Skeleton className="h-[300px]"></Skeleton>
+        <Skeleton className="h-[300px]"></Skeleton>
+        <Skeleton className="h-[300px]"></Skeleton>
+      </div>
+    );
   }
   if (project.isError) {
     return <p>Error</p>;

@@ -8,7 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
@@ -22,34 +21,48 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
-import { useRouter } from "next/router";
 import { Loader2 } from "lucide-react";
-
-const inviteSchema = z.object({
-  email: z.string().min(1).email(),
-});
+import { type Project } from "@prisma/client";
+import { api } from "@/utils/api";
+import { projectInvitationSchema } from "@/lib/validations";
+import { type z } from "zod";
+import { DialogClose } from "@radix-ui/react-dialog";
 
 export default function InviteTeammateMoal({
   open,
   onOpenChange,
-  projectSlug,
+  project,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectSlug: string;
+  project: Project;
 }) {
-  const form = useForm<z.infer<typeof inviteSchema>>({
-    resolver: zodResolver(inviteSchema),
+  const form = useForm<z.infer<typeof projectInvitationSchema>>({
+    resolver: zodResolver(projectInvitationSchema),
     defaultValues: {
       email: "",
     },
   });
   const { toast } = useToast();
-  const router = useRouter();
+  const utils = api.useContext();
 
-  const handleSubmit = useCallback(
-    async (data: z.infer<typeof inviteSchema>) => {},
-    []
+  const inviteMember = api.project.invite.useMutation({
+    onSuccess: () => {
+      utils.project.getInvitations.invalidate({ id: project.id });
+      toast({ title: "Invitations sent" });
+      onOpenChange(false);
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to sent invitation",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleSubmit = form.handleSubmit((data) =>
+    inviteMember.mutate({ id: project.id, data })
   );
 
   return (
@@ -63,7 +76,7 @@ export default function InviteTeammateMoal({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)}>
+          <form onSubmit={handleSubmit}>
             <div className="space-y-6">
               <FormField
                 control={form.control}
@@ -80,16 +93,17 @@ export default function InviteTeammateMoal({
               />
             </div>
             <DialogFooter className="pt-6">
+              <DialogClose asChild>
+                <Button type="reset" variant="ghost">
+                  Cancel
+                </Button>
+              </DialogClose>
+
               <Button
-                type="reset"
-                variant="ghost"
-                onClick={() => onOpenChange(false)}
-                disabled={form.formState.isSubmitting}
+                type="submit"
+                disabled={inviteMember.isLoading || !form.formState.isValid}
               >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={form.formState.isSubmitting}>
-                {form.formState.isSubmitting && (
+                {inviteMember.isLoading && (
                   <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
                 )}
                 Invite
@@ -103,9 +117,9 @@ export default function InviteTeammateMoal({
 }
 
 export const useInviteTeammateModal = ({
-  projectSlug,
+  project,
 }: {
-  projectSlug: string;
+  project: Project;
 }): UseModalReturning => {
   const [open, setOpen] = useState(false);
 
@@ -114,10 +128,10 @@ export const useInviteTeammateModal = ({
       <InviteTeammateMoal
         open={open}
         onOpenChange={setOpen}
-        projectSlug={projectSlug}
+        project={project}
       />
     ),
-    [projectSlug, open]
+    [project, open]
   );
 
   return [open, setOpen, Modal];
