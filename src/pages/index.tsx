@@ -9,7 +9,7 @@ const Page: NextPageWithLayout = () => {
     <main>
       <section className="my-32">
         <div className="mx-auto max-w-2xl text-center">
-          <h1 className="text-6xl font-bold leading-none">
+          <h1 className="bg-gradient-to-br from-accent-foreground to-muted-foreground bg-clip-text text-6xl font-bold leading-none text-transparent">
             Integrate ChatGPT on your Site with Ease
           </h1>
           <p className="mt-8 text-xl leading-snug text-muted-foreground">
