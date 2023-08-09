@@ -14,6 +14,7 @@ import { type MenuItem } from "@/types/menu-item";
 import { cn } from "@/utils";
 import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { type ReactNode } from "react";
@@ -23,14 +24,16 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     isReady,
     query: { project_slug },
   } = useRouter();
+  const { status } = useSession();
 
-  if (!isReady) {
+  if (!isReady || status !== "authenticated") {
     return (
       <div className="flex flex-1 items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
   }
+
   return (
     <>
       <header className="sticky top-0 z-20 border-b bg-card text-card-foreground">

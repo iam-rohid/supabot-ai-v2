@@ -3,10 +3,8 @@ import UpdateProjecNameForm from "@/components/forms/update-project-name-form";
 import UpdateProjectSlugForm from "@/components/forms/update-project-slug-form";
 import { Skeleton } from "@/components/ui/skeleton";
 import SettingsLayout from "@/layouts/settings-layout";
-import { getServerAuthSession } from "@/server/auth";
 import { type NextPageWithLayout } from "@/types/next";
 import { api } from "@/utils/api";
-import { type GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 
 const Page: NextPageWithLayout = () => {
@@ -44,12 +42,3 @@ const Page: NextPageWithLayout = () => {
 Page.getLayout = (page) => <SettingsLayout>{page}</SettingsLayout>;
 
 export default Page;
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getServerAuthSession(ctx);
-  return {
-    props: {
-      session,
-    },
-  };
-};

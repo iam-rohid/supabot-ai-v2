@@ -5,6 +5,7 @@ import NavLink from "./nav-link";
 import { useSession } from "next-auth/react";
 import { Button } from "./ui/button";
 import { ChevronRight } from "lucide-react";
+import { Skeleton } from "./ui/skeleton";
 
 export default function MarketingHeader() {
   return (
@@ -54,6 +55,10 @@ export default function MarketingHeader() {
 
 function AuthButtonGroup() {
   const { status } = useSession();
+
+  if (status === "loading") {
+    return <Skeleton className="h-10 w-24" />;
+  }
 
   if (status === "authenticated") {
     return (

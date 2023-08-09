@@ -10,11 +10,9 @@ import {
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/layouts/dashboard-layout";
-import { getServerAuthSession } from "@/server/auth";
 import { type NextPageWithLayout } from "@/types/next";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
-import { type GetServerSideProps } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -94,12 +92,3 @@ const Page: NextPageWithLayout = () => {
 Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default Page;
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getServerAuthSession(ctx);
-  return {
-    props: {
-      session,
-    },
-  };
-};

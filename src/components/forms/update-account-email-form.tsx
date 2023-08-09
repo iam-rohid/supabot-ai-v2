@@ -37,11 +37,11 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>;
 
 export default function UpdateAccountEmailForm() {
-  const { data } = useSession();
+  const { data: session } = useSession();
   const form = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
-      email: data?.user.email || "",
+      email: session?.user.email || "",
     },
   });
   const { update } = useSession();
@@ -66,10 +66,10 @@ export default function UpdateAccountEmailForm() {
   );
 
   useEffect(() => {
-    if (data?.user.email) {
-      form.setValue("email", data.user.email);
+    if (session?.user.email) {
+      form.setValue("email", session.user.email);
     }
-  }, [data?.user.email, form]);
+  }, [session?.user.email, form]);
 
   return (
     <Card>

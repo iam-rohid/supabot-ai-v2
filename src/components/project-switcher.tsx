@@ -34,11 +34,7 @@ export default function ProjectSwitcher() {
     [projects.data, router.query.project_slug]
   );
 
-  if (!data) {
-    return null;
-  }
-
-  if (projects.isLoading) {
+  if (!data || projects.isLoading) {
     return <Skeleton className="-mx-2 h-10 w-32" />;
   }
 

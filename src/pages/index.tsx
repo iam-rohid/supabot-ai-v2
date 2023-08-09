@@ -1,9 +1,7 @@
 import { Button } from "@/components/ui/button";
 import MarketingLayout from "@/layouts/marketing-layout";
-import { getServerAuthSession } from "@/server/auth";
 import { type NextPageWithLayout } from "@/types/next";
 import { ChevronRight, GithubIcon } from "lucide-react";
-import { type GetServerSideProps } from "next";
 import Link from "next/link";
 
 const Page: NextPageWithLayout = () => {
@@ -41,12 +39,3 @@ const Page: NextPageWithLayout = () => {
 Page.getLayout = (page) => <MarketingLayout>{page}</MarketingLayout>;
 
 export default Page;
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getServerAuthSession(ctx);
-  return {
-    props: {
-      session,
-    },
-  };
-};
