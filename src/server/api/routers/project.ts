@@ -255,7 +255,7 @@ export const projectRouter = createTRPCRouter({
       const expires = new Date(Date.now() + 86_400 * 14 * 1000); // 86_400 is 1 day in seconds
       const token = randomBytes(32).toString("hex");
       const params = new URLSearchParams({
-        callbackUrl: `${process.env.NEXTAUTH_URL}/dashboard/${projectUser.project.slug}`,
+        callbackUrl: `${process.env.NEXTAUTH_URL}/dashboard/${projectUser.project.slug}/invitation`,
         token,
         email: input.data.email,
       });
@@ -298,6 +298,50 @@ export const projectRouter = createTRPCRouter({
       }
 
       return invitation;
+    }),
+  deleteInvitation: protectedProcedure
+    .input(z.object({ id: z.string(), data: projectInvitationSchema }))
+    .mutation(async ({ ctx, input }) => {
+      const projectUser = await ctx.prisma.projectUser.findFirst({
+        where: { projectId: input.id, userId: ctx.session.user.id },
+        select: {
+          role: true,
+          project: {
+            select: {
+              slug: true,
+              name: true,
+            },
+          },
+        },
+      });
+      if (!projectUser) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found!",
+        });
+      }
+      if (!["OWNER", "ADMIN"].includes(projectUser.role)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "Only the project owner and admin can delete invitations",
+        });
+      }
+      const invitationExists = await ctx.prisma.projectInvitation.findUnique({
+        where: {
+          projectId_email: { email: input.data.email, projectId: input.id },
+        },
+      });
+      if (!invitationExists) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Invitation not found",
+        });
+      }
+      return ctx.prisma.projectInvitation.delete({
+        where: {
+          projectId_email: { email: input.data.email, projectId: input.id },
+        },
+      });
     }),
   invitation: protectedProcedure
     .input(

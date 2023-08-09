@@ -1,4 +1,4 @@
-import { type Project } from "@prisma/client";
+import { type ProjectInvitation, type Project } from "@prisma/client";
 import InviteTeammateButton from "./invite-teammate-button";
 import { api } from "@/utils/api";
 import { format } from "date-fns";
@@ -12,13 +12,40 @@ import {
   TableCell,
 } from "./ui/table";
 import { Button } from "./ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { useToast } from "./ui/use-toast";
 
 export default function ProjectInvitationsList({
   project,
 }: {
   project: Project;
 }) {
+  const { toast } = useToast();
   const invitations = api.project.getInvitations.useQuery({ id: project.id });
+  const utils = api.useContext();
+  const deleteInvitation = api.project.deleteInvitation.useMutation({
+    onSuccess: () => {
+      utils.project.getInvitations.invalidate({ id: project.id });
+      toast({ title: "Invitation deleted" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete invitation",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+  const handleDeleteInvitation = (invitation: ProjectInvitation) =>
+    deleteInvitation.mutate({
+      id: project.id,
+      data: { email: invitation.email },
+    });
 
   if (invitations.isLoading) {
     return <p>Loading...</p>;
@@ -57,9 +84,24 @@ export default function ProjectInvitationsList({
                 {format(new Date(invitation.createdAt), "MMM dd, yyyy")}
               </TableCell>
               <TableCell>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={deleteInvitation.isLoading}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={() => handleDeleteInvitation(invitation)}
+                    >
+                      Delete Invitation
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
