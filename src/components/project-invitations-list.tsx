@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useToast } from "./ui/use-toast";
+import { Skeleton } from "./ui/skeleton";
 
 export default function ProjectInvitationsList({
   project,
@@ -48,7 +49,7 @@ export default function ProjectInvitationsList({
     });
 
   if (invitations.isLoading) {
-    return <p>Loading...</p>;
+    return <Skeleton className="h-32" />;
   }
   if (invitations.isError) {
     return <p>Error</p>;

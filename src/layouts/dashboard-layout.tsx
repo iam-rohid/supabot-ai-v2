@@ -13,14 +13,24 @@ import UserButton from "@/components/user-button";
 import { type MenuItem } from "@/types/menu-item";
 import { cn } from "@/utils";
 import { api } from "@/utils/api";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { type ReactNode } from "react";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const {
+    isReady,
     query: { project_slug },
   } = useRouter();
+
+  if (!isReady) {
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
   return (
     <>
       <header className="sticky top-0 z-20 border-b bg-card text-card-foreground">
@@ -122,7 +132,11 @@ const ProtectProject = ({
 }) => {
   const project = api.project.getBySlug.useQuery({ slug: projectSlug });
   if (project.isLoading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex flex-1 items-center justify-center">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
   }
   if (project.isError) {
     return <p>Error</p>;

@@ -8,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import DashboardLayout from "@/layouts/dashboard-layout";
 import { getServerAuthSession } from "@/server/auth";
 import { type NextPageWithLayout } from "@/types/next";
@@ -31,7 +32,11 @@ const Page: NextPageWithLayout = () => {
 
       <main className="container py-8">
         {projects.isLoading ? (
-          <p>Loading...</p>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {new Array(4).fill(1).map((_, i) => (
+              <Skeleton key={i} className="h-32" />
+            ))}
+          </div>
         ) : projects.isError ? (
           <p>Error</p>
         ) : projects.data.length > 0 ? (

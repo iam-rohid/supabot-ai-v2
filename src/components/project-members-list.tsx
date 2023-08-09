@@ -30,6 +30,7 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import ButtonLoadingSpinner from "./button-loading-spinner";
+import { Skeleton } from "./ui/skeleton";
 
 export default function ProjectMembersList({ project }: { project: Project }) {
   const members = api.project.getMembers.useQuery({ id: project.id });
@@ -53,7 +54,7 @@ export default function ProjectMembersList({ project }: { project: Project }) {
   });
 
   if (members.isLoading) {
-    return <p>Loading...</p>;
+    return <Skeleton className="h-32" />;
   }
   if (members.isError) {
     return <p>Error</p>;
