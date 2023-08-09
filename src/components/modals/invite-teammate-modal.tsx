@@ -21,12 +21,12 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
-import { Loader2 } from "lucide-react";
 import { type Project } from "@prisma/client";
 import { api } from "@/utils/api";
 import { projectInvitationSchema } from "@/lib/validations";
 import { type z } from "zod";
 import { DialogClose } from "@radix-ui/react-dialog";
+import ButtonLoadingSpinner from "../button-loading-spinner";
 
 export default function InviteTeammateMoal({
   open,
@@ -103,9 +103,7 @@ export default function InviteTeammateMoal({
                 type="submit"
                 disabled={inviteMember.isLoading || !form.formState.isValid}
               >
-                {inviteMember.isLoading && (
-                  <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-                )}
+                {inviteMember.isLoading && <ButtonLoadingSpinner />}
                 Invite
               </Button>
             </DialogFooter>

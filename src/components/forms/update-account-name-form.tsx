@@ -21,11 +21,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { APP_NAME } from "@/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import ButtonLoadingSpinner from "../button-loading-spinner";
 
 const schema = z.object({
   name: z
@@ -98,9 +98,7 @@ export default function UpdateAccountNameForm() {
           </CardContent>
           <CardFooter>
             <Button disabled={!form.formState.isDirty || updateUser.isLoading}>
-              {updateUser.isLoading && (
-                <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-              )}
+              {updateUser.isLoading && <ButtonLoadingSpinner />}
               Save Changes
             </Button>
           </CardFooter>

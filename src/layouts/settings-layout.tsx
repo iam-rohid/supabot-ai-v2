@@ -44,7 +44,7 @@ const SettingsLayout = ({ children }: { children: ReactNode }) => {
               asChild
               variant="ghost"
               className={cn("justify-start text-left text-muted-foreground", {
-                "text-accent-foreground": item.end
+                "bg-muted text-accent-foreground": item.end
                   ? asPath === item.href
                   : asPath.startsWith(item.href),
               })}

@@ -10,7 +10,6 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
-import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { APP_NAME } from "@/utils/constants";
 import { type UseModalReturning } from "./types";
@@ -27,6 +26,7 @@ import {
 } from "../ui/form";
 import { api } from "@/utils/api";
 import { DialogClose } from "@radix-ui/react-dialog";
+import ButtonLoadingSpinner from "../button-loading-spinner";
 
 const VERIFY_TEXT = "confirm delete account";
 
@@ -105,9 +105,7 @@ export function DeleteAccountModal({
                 disabled={deleteUser.isLoading || !form.formState.isValid}
                 variant="destructive"
               >
-                {deleteUser.isLoading && (
-                  <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-                )}
+                {deleteUser.isLoading && <ButtonLoadingSpinner />}
                 Delete Account
               </Button>
             </DialogFooter>

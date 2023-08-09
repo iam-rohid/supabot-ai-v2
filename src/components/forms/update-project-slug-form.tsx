@@ -22,10 +22,10 @@ import { api } from "@/utils/api";
 import { APP_NAME } from "@/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Project } from "@prisma/client";
-import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import ButtonLoadingSpinner from "../button-loading-spinner";
 
 const updateSlugSchema = z.object({
   slug: z
@@ -101,9 +101,7 @@ export default function UpdateProjectSlugForm({
             <Button
               disabled={form.formState.isSubmitting || !form.formState.isDirty}
             >
-              {form.formState.isSubmitting && (
-                <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-              )}
+              {form.formState.isSubmitting && <ButtonLoadingSpinner />}
               Save Changes
             </Button>
           </CardFooter>

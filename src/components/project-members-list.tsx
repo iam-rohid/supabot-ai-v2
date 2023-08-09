@@ -12,9 +12,45 @@ import {
 } from "./ui/table";
 import { Button } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { useToast } from "./ui/use-toast";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "./ui/alert-dialog";
+import ButtonLoadingSpinner from "./button-loading-spinner";
 
 export default function ProjectMembersList({ project }: { project: Project }) {
   const members = api.project.getMembers.useQuery({ id: project.id });
+  const { toast } = useToast();
+  const utils = api.useContext();
+  const [memberIdToRemove, setMemberIdToRemove] = useState<string | null>();
+
+  const removeMember = api.project.removeMember.useMutation({
+    onSuccess: () => {
+      setMemberIdToRemove(null);
+      utils.project.getMembers.invalidate({ id: project.id });
+      toast({ title: "Member removed" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to remove member",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   if (members.isLoading) {
     return <p>Loading...</p>;
@@ -62,14 +98,64 @@ export default function ProjectMembersList({ project }: { project: Project }) {
                 {format(new Date(member.createdAt), "MMM dd, yyyy")}
               </TableCell>
               <TableCell>
-                <Button variant="ghost" size="icon">
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      disabled={removeMember.isLoading}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem
+                      onClick={() => setMemberIdToRemove(member.userId)}
+                    >
+                      Remove
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+
+      <AlertDialog open={!!memberIdToRemove}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to remove a member from this project. Are you sure
+              you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              disabled={removeMember.isLoading}
+              onClick={() => setMemberIdToRemove(null)}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="destructive"
+              onClick={() =>
+                memberIdToRemove
+                  ? removeMember.mutate({
+                      projectId: project.id,
+                      userId: memberIdToRemove,
+                    })
+                  : undefined
+              }
+              disabled={removeMember.isLoading}
+            >
+              {removeMember.isLoading && <ButtonLoadingSpinner />}
+              Remove Member
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

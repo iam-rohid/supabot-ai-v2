@@ -1,3 +1,4 @@
+import ButtonLoadingSpinner from "@/components/button-loading-spinner";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -91,9 +92,7 @@ const Invitation = () => {
             onClick={hanldeAcceptInvitation}
             disabled={acceptInvitation.isLoading}
           >
-            {acceptInvitation.isLoading && (
-              <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-            )}
+            {acceptInvitation.isLoading && <ButtonLoadingSpinner />}
             Accept
           </Button>
         </CardFooter>

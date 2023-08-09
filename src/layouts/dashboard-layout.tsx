@@ -1,3 +1,4 @@
+import ButtonLoadingSpinner from "@/components/button-loading-spinner";
 import ProjectSwitcher from "@/components/project-switcher";
 import ThemeSwitcher from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
@@ -12,7 +13,6 @@ import UserButton from "@/components/user-button";
 import { type MenuItem } from "@/types/menu-item";
 import { cn } from "@/utils";
 import { api } from "@/utils/api";
-import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { type ReactNode } from "react";
@@ -139,9 +139,7 @@ const ProtectProject = ({
         </CardHeader>
         <CardFooter>
           <Button onClick={() => project.refetch()}>
-            {project.isRefetching && (
-              <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-            )}
+            {project.isRefetching && <ButtonLoadingSpinner />}
             Refresh
           </Button>
         </CardFooter>

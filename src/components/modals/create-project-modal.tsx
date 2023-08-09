@@ -1,4 +1,3 @@
-import { Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +27,7 @@ import {
   createProjectSchema,
 } from "@/lib/validations";
 import { DialogClose } from "@radix-ui/react-dialog";
+import ButtonLoadingSpinner from "../button-loading-spinner";
 
 export function CreateProjectModal({
   open,
@@ -110,9 +110,7 @@ export function CreateProjectModal({
                 </Button>
               </DialogClose>
               <Button type="submit" disabled={createProject.isLoading}>
-                {createProject.isLoading && (
-                  <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-                )}
+                {createProject.isLoading && <ButtonLoadingSpinner />}
                 Create Project
               </Button>
             </DialogFooter>

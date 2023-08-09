@@ -24,9 +24,9 @@ import { api } from "@/utils/api";
 import { APP_NAME } from "@/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { type Project } from "@prisma/client";
-import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import ButtonLoadingSpinner from "../button-loading-spinner";
 
 const updateNameSchema = z.object({
   name: z
@@ -101,9 +101,7 @@ export default function UpdateProjecNameForm({
               type="submit"
               disabled={updateProject.isLoading || !form.formState.isDirty}
             >
-              {updateProject.isLoading && (
-                <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-              )}
+              {updateProject.isLoading && <ButtonLoadingSpinner />}
               Save Changes
             </Button>
           </CardFooter>

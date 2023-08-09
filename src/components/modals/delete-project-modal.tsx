@@ -11,7 +11,6 @@ import {
 import { Input } from "../ui/input";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { Button } from "../ui/button";
-import { Loader2 } from "lucide-react";
 import { type UseModalReturning } from "./types";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -27,6 +26,7 @@ import {
 import { api } from "@/utils/api";
 import { type Project } from "@prisma/client";
 import { useRouter } from "next/router";
+import ButtonLoadingSpinner from "../button-loading-spinner";
 
 const VERIFY_TEXT = "confirm delete project";
 
@@ -134,9 +134,7 @@ export function DeleteProjectModal({
                 type="submit"
                 disabled={!form.formState.isValid || deleteProject.isLoading}
               >
-                {deleteProject.isLoading && (
-                  <Loader2 className="-ml-1 mr-2 h-4 w-4 animate-spin" />
-                )}
+                {deleteProject.isLoading && <ButtonLoadingSpinner />}
                 Delete Project
               </Button>
             </DialogFooter>

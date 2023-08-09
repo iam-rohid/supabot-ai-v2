@@ -172,6 +172,63 @@ export const projectRouter = createTRPCRouter({
         },
       });
     }),
+  removeMember: protectedProcedure
+    .input(z.object({ projectId: z.string(), userId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const projectUser = await ctx.prisma.projectUser.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: input.projectId,
+            userId: ctx.session.user.id,
+          },
+        },
+        select: {
+          role: true,
+          project: {
+            select: {
+              slug: true,
+              name: true,
+            },
+          },
+        },
+      });
+      if (!projectUser) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found!",
+        });
+      }
+      if (!["OWNER", "ADMIN"].includes(projectUser.role)) {
+        throw new TRPCError({
+          code: "UNAUTHORIZED",
+          message: "You don't have permission to remove anyone from project.",
+        });
+      }
+      const member = await ctx.prisma.projectUser.findUnique({
+        where: { projectId_userId: input },
+      });
+      if (!member) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Member not found!",
+        });
+      }
+      if (member.role === "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You cannot remove an owner from project.",
+        });
+      }
+      if (member.role === "ADMIN" && projectUser.role !== "OWNER") {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Only an owner can remove an admin from project",
+        });
+      }
+      return ctx.prisma.projectUser.delete({
+        where: { projectId_userId: input },
+      });
+    }),
   getInvitations: protectedProcedure
     .input(
       z.object({
@@ -200,8 +257,13 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const projectUser = await ctx.prisma.projectUser.findFirst({
-        where: { projectId: input.id, userId: ctx.session.user.id },
+      const projectUser = await ctx.prisma.projectUser.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: input.id,
+            userId: ctx.session.user.id,
+          },
+        },
         select: {
           role: true,
           project: {
@@ -302,8 +364,13 @@ export const projectRouter = createTRPCRouter({
   deleteInvitation: protectedProcedure
     .input(z.object({ id: z.string(), data: projectInvitationSchema }))
     .mutation(async ({ ctx, input }) => {
-      const projectUser = await ctx.prisma.projectUser.findFirst({
-        where: { projectId: input.id, userId: ctx.session.user.id },
+      const projectUser = await ctx.prisma.projectUser.findUnique({
+        where: {
+          projectId_userId: {
+            projectId: input.id,
+            userId: ctx.session.user.id,
+          },
+        },
         select: {
           role: true,
           project: {
