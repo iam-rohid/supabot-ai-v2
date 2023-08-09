@@ -38,6 +38,7 @@
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "drizzle-orm": "^0.28.1",
+    "get-sitemap-links": "^1.1.0",
     "lucide-react": "^0.265.0",
     "nanoid": "^4.0.2",
     "next": "^13.4.2",
