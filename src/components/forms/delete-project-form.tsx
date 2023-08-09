@@ -7,8 +7,8 @@ import {
   CardDescription,
   CardFooter,
 } from "@/components/ui/card";
+import { type Project } from "@/lib/schema/projects";
 import { APP_NAME } from "@/utils/constants";
-import { type Project } from "@prisma/client";
 
 export default function DeleteProjectForm({ project }: { project: Project }) {
   const [, setDeleteProjectModalOpen, DeleteProjectModal] =

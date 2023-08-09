@@ -1,5 +1,4 @@
 import { api } from "@/utils/api";
-import { type Project } from "@prisma/client";
 import { format } from "date-fns";
 import { UserIcon, MoreVertical } from "lucide-react";
 import {
@@ -31,9 +30,10 @@ import {
 } from "./ui/alert-dialog";
 import ButtonLoadingSpinner from "./button-loading-spinner";
 import { Skeleton } from "./ui/skeleton";
+import { type Project } from "@/lib/schema/projects";
 
 export default function ProjectMembersList({ project }: { project: Project }) {
-  const members = api.project.getMembers.useQuery({ id: project.id });
+  const members = api.project.getMembers.useQuery({ projectId: project.id });
   const { toast } = useToast();
   const utils = api.useContext();
   const [memberIdToRemove, setMemberIdToRemove] = useState<string | null>();
@@ -41,7 +41,7 @@ export default function ProjectMembersList({ project }: { project: Project }) {
   const removeMember = api.project.removeMember.useMutation({
     onSuccess: () => {
       setMemberIdToRemove(null);
-      utils.project.getMembers.invalidate({ id: project.id });
+      utils.project.getMembers.invalidate({ projectId: project.id });
       toast({ title: "Member removed" });
     },
     onError: (error) => {
@@ -73,12 +73,14 @@ export default function ProjectMembersList({ project }: { project: Project }) {
         </TableHeader>
         <TableBody>
           {members.data.map((member) => (
-            <TableRow key={member.userId}>
+            <TableRow key={member.users.id}>
               <TableCell>
                 <div className="flex items-center gap-4">
                   <Avatar>
                     <AvatarImage
-                      src={member.user.image || `/api/avatar/${member.userId}`}
+                      src={
+                        member.users.image || `/api/avatar/${member.users.id}`
+                      }
                     />
                     <AvatarFallback>
                       <UserIcon className="h-6 w-6" />
@@ -86,17 +88,22 @@ export default function ProjectMembersList({ project }: { project: Project }) {
                   </Avatar>
                   <div className="flex-1">
                     <p className="font-medium leading-none">
-                      {member.user.name || member.user.email}
+                      {member.users.name || member.users.email}
                     </p>
                     <p className="text-sm text-muted-foreground">
-                      {member.user.email}
+                      {member.users.email}
                     </p>
                   </div>
                 </div>
               </TableCell>
-              <TableCell className="uppercase">{member.role}</TableCell>
+              <TableCell className="uppercase">
+                {member.project_users.role}
+              </TableCell>
               <TableCell>
-                {format(new Date(member.createdAt), "MMM dd, yyyy")}
+                {format(
+                  new Date(member.project_users.createdAt),
+                  "MMM dd, yyyy"
+                )}
               </TableCell>
               <TableCell>
                 <DropdownMenu>
@@ -111,7 +118,7 @@ export default function ProjectMembersList({ project }: { project: Project }) {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
-                      onClick={() => setMemberIdToRemove(member.userId)}
+                      onClick={() => setMemberIdToRemove(member.users.id)}
                     >
                       Remove
                     </DropdownMenuItem>

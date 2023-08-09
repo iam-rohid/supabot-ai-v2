@@ -21,7 +21,7 @@ const Page: NextPageWithLayout = () => {
     query: { project_slug },
   } = useRouter();
   const project = api.project.getBySlug.useQuery({
-    slug: project_slug as string,
+    projectSlug: project_slug as string,
   });
   if (project.isLoading) {
     return <Skeleton className="h-[400px]"></Skeleton>;

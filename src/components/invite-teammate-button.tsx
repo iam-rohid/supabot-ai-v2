@@ -1,4 +1,4 @@
-import { type Project } from "@prisma/client";
+import { type Project } from "@/lib/schema/projects";
 import { useInviteTeammateModal } from "./modals/invite-teammate-modal";
 import { Button } from "./ui/button";
 

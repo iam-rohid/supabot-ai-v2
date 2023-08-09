@@ -24,9 +24,9 @@ import {
   FormMessage,
 } from "../ui/form";
 import { api } from "@/utils/api";
-import { type Project } from "@prisma/client";
 import { useRouter } from "next/router";
 import ButtonLoadingSpinner from "../button-loading-spinner";
+import { type Project } from "@/lib/schema/projects";
 
 const VERIFY_TEXT = "confirm delete project";
 
@@ -76,7 +76,7 @@ export function DeleteProjectModal({
       form.setError("slug", { message: "Slug didn't matched" });
       return;
     }
-    deleteProject.mutate({ id: project.id });
+    deleteProject.mutate({ projectId: project.id });
   });
 
   return (

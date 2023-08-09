@@ -1,4 +1,3 @@
-import { type ProjectInvitation, type Project } from "@prisma/client";
 import InviteTeammateButton from "./invite-teammate-button";
 import { api } from "@/utils/api";
 import { format } from "date-fns";
@@ -20,6 +19,7 @@ import {
 } from "./ui/dropdown-menu";
 import { useToast } from "./ui/use-toast";
 import { Skeleton } from "./ui/skeleton";
+import { type Project } from "@/lib/schema/projects";
 
 export default function ProjectInvitationsList({
   project,
@@ -27,11 +27,13 @@ export default function ProjectInvitationsList({
   project: Project;
 }) {
   const { toast } = useToast();
-  const invitations = api.project.getInvitations.useQuery({ id: project.id });
+  const invitations = api.project.getInvitations.useQuery({
+    projectId: project.id,
+  });
   const utils = api.useContext();
   const deleteInvitation = api.project.deleteInvitation.useMutation({
     onSuccess: () => {
-      utils.project.getInvitations.invalidate({ id: project.id });
+      utils.project.getInvitations.invalidate({ projectId: project.id });
       toast({ title: "Invitation deleted" });
     },
     onError: (error) => {
@@ -42,11 +44,6 @@ export default function ProjectInvitationsList({
       });
     },
   });
-  const handleDeleteInvitation = (invitation: ProjectInvitation) =>
-    deleteInvitation.mutate({
-      id: project.id,
-      data: { email: invitation.email },
-    });
 
   if (invitations.isLoading) {
     return <Skeleton className="h-32" />;
@@ -97,7 +94,12 @@ export default function ProjectInvitationsList({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent>
                     <DropdownMenuItem
-                      onClick={() => handleDeleteInvitation(invitation)}
+                      onClick={() =>
+                        deleteInvitation.mutate({
+                          projectId: project.id,
+                          data: { email: invitation.email },
+                        })
+                      }
                     >
                       Delete Invitation
                     </DropdownMenuItem>

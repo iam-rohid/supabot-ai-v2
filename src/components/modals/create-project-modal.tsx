@@ -52,7 +52,7 @@ export function CreateProjectModal({
       await utils.project.getAll.invalidate();
       toast({ title: "Project Created" });
       onOpenChange(false);
-      router.push(`/dashboard/${data.slug}`);
+      router.push(`/dashboard/${data.project.slug}`);
     },
     onError: (error) => {
       toast({

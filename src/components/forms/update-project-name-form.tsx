@@ -23,10 +23,10 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { APP_NAME } from "@/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type Project } from "@prisma/client";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ButtonLoadingSpinner from "../button-loading-spinner";
+import { type Project } from "@/lib/schema/projects";
 
 const updateNameSchema = z.object({
   name: z
@@ -54,7 +54,7 @@ export default function UpdateProjecNameForm({
   const updateProject = api.project.update.useMutation({
     onSuccess: () => {
       utils.project.getAll.invalidate();
-      utils.project.getBySlug.invalidate({ slug: project.slug });
+      utils.project.getBySlug.invalidate({ projectSlug: project.slug });
       toast({ title: "Project name updated" });
     },
     onError: (error) => {
@@ -67,7 +67,7 @@ export default function UpdateProjecNameForm({
   });
 
   const handleSubmit = form.handleSubmit((data) =>
-    updateProject.mutate({ id: project.id, data })
+    updateProject.mutate({ projectId: project.id, data })
   );
 
   return (

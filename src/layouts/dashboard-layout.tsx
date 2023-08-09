@@ -133,7 +133,7 @@ const ProtectProject = ({
   projectSlug: string;
   children: ReactNode;
 }) => {
-  const project = api.project.getBySlug.useQuery({ slug: projectSlug });
+  const project = api.project.getBySlug.useQuery({ projectSlug });
   if (project.isLoading) {
     return (
       <div className="flex flex-1 items-center justify-center">
