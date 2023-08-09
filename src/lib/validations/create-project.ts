@@ -9,6 +9,7 @@ export const createProjectSchema = z.object({
     .string({ required_error: "Slug is required" })
     .min(1, "Slug is required")
     .max(32),
+  description: z.string().max(300).optional(),
 });
 
 export type CreateProjectSchemaData = z.infer<typeof createProjectSchema>;

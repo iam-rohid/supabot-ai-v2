@@ -21,12 +21,12 @@ import {
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { useToast } from "../ui/use-toast";
-import { type Project } from "@prisma/client";
 import { api } from "@/utils/api";
 import { projectInvitationSchema } from "@/lib/validations";
 import { type z } from "zod";
 import { DialogClose } from "@radix-ui/react-dialog";
 import ButtonLoadingSpinner from "../button-loading-spinner";
+import { type Project } from "@/lib/schema/projects";
 
 export default function InviteTeammateMoal({
   open,
@@ -48,7 +48,7 @@ export default function InviteTeammateMoal({
 
   const inviteMember = api.project.invite.useMutation({
     onSuccess: () => {
-      utils.project.getInvitations.invalidate({ id: project.id });
+      utils.project.getInvitations.invalidate({ projectId: project.id });
       toast({ title: "Invitations sent" });
       onOpenChange(false);
     },
@@ -62,7 +62,7 @@ export default function InviteTeammateMoal({
   });
 
   const handleSubmit = form.handleSubmit((data) =>
-    inviteMember.mutate({ id: project.id, data })
+    inviteMember.mutate({ projectId: project.id, data })
   );
 
   return (

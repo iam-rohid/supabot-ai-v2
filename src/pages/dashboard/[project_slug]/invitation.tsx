@@ -20,12 +20,12 @@ const Invitation = () => {
 
   const utils = api.useContext();
   const invitation = api.project.invitation.useQuery({
-    slug,
+    projectSlug: slug,
   });
   const acceptInvitation = api.project.acceptInvitation.useMutation({
     onSuccess: () => {
       toast({ title: "Invitation accepted" });
-      utils.project.getBySlug.invalidate({ slug });
+      utils.project.getBySlug.invalidate({ projectSlug: slug });
       router.push(`/dashboard/${slug}`);
     },
     onError: (error) => {
@@ -39,7 +39,7 @@ const Invitation = () => {
 
   const hanldeAcceptInvitation = () => {
     if (invitation.data) {
-      acceptInvitation.mutate({ projectId: invitation.data.projectId });
+      acceptInvitation.mutate({ projectId: invitation.data.projects.id });
     }
   };
 
@@ -81,7 +81,7 @@ const Invitation = () => {
       <Card className="w-full max-w-lg">
         <CardHeader>
           <CardTitle>
-            You are invited to join {invitation.data.project.name}
+            You are invited to join {invitation.data.projects.name}
           </CardTitle>
           <CardDescription>
             Please click on accept to accept this invitation.

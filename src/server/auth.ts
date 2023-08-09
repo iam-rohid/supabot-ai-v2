@@ -1,18 +1,20 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { type GetServerSidePropsContext } from "next";
 import { getServerSession, type NextAuthOptions } from "next-auth";
 import GithubProvider from "next-auth/providers/github";
 import EmailProvider from "next-auth/providers/email";
 import { env } from "@/env.mjs";
-import { prisma } from "@/server/db";
+import { db } from "@/server/db";
 import { createHash } from "crypto";
+import { eq } from "drizzle-orm";
+import { drizzleAdapter } from "./drizzle-adapter";
+import { usersTable } from "@/lib/schema/users";
 
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
   },
   secret: env.NEXTAUTH_SECRET,
-  adapter: PrismaAdapter(prisma),
+  adapter: drizzleAdapter,
   providers: [
     EmailProvider({
       sendVerificationRequest: ({ url }) => {
@@ -26,15 +28,17 @@ export const authOptions: NextAuthOptions = {
   ],
   callbacks: {
     jwt: async ({ token, trigger }) => {
-      if (!token.email && token.sub) {
+      if (!(token.email && token.sub)) {
         return {};
       }
       if (trigger) {
-        const user = await prisma.user.findUnique({ where: { id: token.sub } });
+        const [user] = await db
+          .select()
+          .from(usersTable)
+          .where(eq(usersTable.id, token.sub));
         if (!user) {
           return {};
         }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         token.role = user.role;
         token.email = user.email;
         token.name = user.name;
@@ -45,7 +49,6 @@ export const authOptions: NextAuthOptions = {
     session: ({ session, token }) => {
       if (token.sub) {
         session.user.id = token.sub;
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         session.user.role = token.role;
         session.user.image = token.picture;
         session.user.name = token.name;

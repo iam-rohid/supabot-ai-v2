@@ -13,7 +13,7 @@ import { type Session } from "next-auth";
 import superjson from "superjson";
 import { ZodError } from "zod";
 import { getServerAuthSession } from "@/server/auth";
-import { prisma } from "@/server/db";
+import { db } from "../db";
 
 /**
  * 1. CONTEXT
@@ -40,7 +40,7 @@ interface CreateContextOptions {
 const createInnerTRPCContext = (opts: CreateContextOptions) => {
   return {
     session: opts.session,
-    prisma,
+    db,
   };
 };
 

@@ -21,11 +21,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
 import { APP_NAME } from "@/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { type Project } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ButtonLoadingSpinner from "../button-loading-spinner";
+import { type Project } from "@/lib/schema/projects";
 
 const updateSlugSchema = z.object({
   slug: z
@@ -68,7 +68,7 @@ export default function UpdateProjectSlugForm({
   });
 
   const handleSubmit = form.handleSubmit((data) =>
-    updateProject.mutate({ id: project.id, data })
+    updateProject.mutate({ projectId: project.id, data })
   );
 
   return (
