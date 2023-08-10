@@ -18,6 +18,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { useToast } from "@/components/ui/use-toast";
 import DashboardLayout from "@/layouts/dashboard-layout";
 import { type Link as LinkRow } from "@/lib/schema/links";
 import { type NextPageWithLayout } from "@/types/next";
@@ -52,6 +53,36 @@ const Page: NextPageWithLayout = () => {
       refetchInterval: 1000 * 60, // Refetch every 1 min
     }
   );
+  const { toast } = useToast();
+  const utils = api.useContext();
+
+  const retrainLink = api.link.retrain.useMutation({
+    onSuccess: () => {
+      utils.link.getAll.refetch({ projectSlug: project_slug as string });
+      toast({ title: "Link is retraining" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to retrain retrain",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteLink = api.link.delete.useMutation({
+    onSuccess: () => {
+      utils.link.getAll.refetch({ projectSlug: project_slug as string });
+      toast({ title: "Link delete success" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete link",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   if (links.isLoading) {
     return (
@@ -180,11 +211,22 @@ const Page: NextPageWithLayout = () => {
                               Visit
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              retrainLink.mutate({
+                                linkId: link.id,
+                              })
+                            }
+                          >
                             <RefreshCcw className="mr-2 h-4 w-4" />
                             Retrain
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="focus:bg-destructive focus:text-destructive-foreground">
+                          <DropdownMenuItem
+                            className="focus:bg-destructive focus:text-destructive-foreground"
+                            onClick={() =>
+                              deleteLink.mutate({ linkId: link.id })
+                            }
+                          >
                             <Trash className="mr-2 h-4 w-4" />
                             Delete
                           </DropdownMenuItem>

@@ -11,9 +11,8 @@ import {
 } from "@/server/training-utils";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
-  console.log("If this is printed, the signature has already been verified");
-  console.log(JSON.stringify(req.body));
-  const linkId = req.body.id;
+  const { linkId, type } = req.body;
+
   if (!linkId) {
     return res.status(400).send("Link id not found");
   }
@@ -27,12 +26,11 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!link) {
     return res.status(400).send("Link not found!");
   }
-  // if it's not idle do nothing;
-  if (link.trainingStatus !== "idle") {
-    return res.status(400).send("Link training status is not idle!");
+  // if it's training do nothing;
+  if (link.trainingStatus === "training") {
+    return res.status(400).send("Link is already in training!");
   }
 
-  // if it's idle then train
   // change status to training
   await db
     .update(linksTable)
@@ -42,8 +40,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     })
     .where(eq(linksTable.id, linkId));
 
-  // Delete all embeding for this link if any available
-  await db.delete(embeddingsTable).where(eq(embeddingsTable.linkId, linkId));
+  // Delete all embeding for this link if type === retrain
+  if (type === "retrain") {
+    await db.delete(embeddingsTable).where(eq(embeddingsTable.linkId, linkId));
+  }
 
   // fetch the website
   let html: string;

@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { linksTable } from "@/lib/schema/links";
-import { requireProjectUserBySlug } from "./common";
+import { requireProjectUser, requireProjectUserBySlug } from "./common";
 import GetSitemapLinks from "get-sitemap-links";
 import { Client } from "@upstash/qstash";
+import { TRPCError } from "@trpc/server";
 
 const c = new Client({
   token: process.env.QSTASH_TOKEN!,
@@ -66,11 +67,75 @@ export const linkRouter = createTRPCRouter({
       await Promise.allSettled(
         links.map((link) =>
           c.publishJSON({
-            body: link,
+            body: {
+              type: "train",
+              linkId: link.id,
+            },
             topic: "new-link-added",
           })
         )
       );
       return links;
+    }),
+  retrain: protectedProcedure
+    .input(
+      z.object({
+        linkId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [link] = await ctx.db
+        .select()
+        .from(linksTable)
+        .where(and(eq(linksTable.id, input.linkId)))
+        .limit(1);
+      if (!link) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Link not found!" });
+      }
+      // Make sure user have access to the project
+      await requireProjectUser(ctx.db, ctx.session.user.id, link.projectId);
+
+      if (!["trained", "failed"].includes(link.trainingStatus)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Link is already in queue or training",
+        });
+      }
+      return c.publishJSON({
+        body: {
+          type: "retrain",
+          linkId: input.linkId,
+        },
+        topic: "new-link-added",
+      });
+    }),
+
+  delete: protectedProcedure
+    .input(
+      z.object({
+        linkId: z.string(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const [link] = await ctx.db
+        .select()
+        .from(linksTable)
+        .where(and(eq(linksTable.id, input.linkId)))
+        .limit(1);
+      if (!link) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Link not found!" });
+      }
+      // Make sure user have access to the project
+      await requireProjectUser(ctx.db, ctx.session.user.id, link.projectId);
+      if (!["trained", "failed"].includes(link.trainingStatus)) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "Link is in queue or training",
+        });
+      }
+      return ctx.db
+        .delete(linksTable)
+        .where(eq(linksTable.id, input.linkId))
+        .returning();
     }),
 });
