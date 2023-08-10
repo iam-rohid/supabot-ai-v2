@@ -12,11 +12,14 @@ import { u } from "unist-builder";
 export const htmlToMarkdown = (html: string) => {
   const $ = cheerio.load(html);
   const title = $("title").text();
-  const body = $("body").html();
-  if (!body || !body.length) {
-    throw "No <body> tag found in the webpage.";
+  let content = $("main").html();
+  if (!content || !content.length) {
+    content = $("body").html();
   }
-  const markdown = NodeHtmlMarkdown.translate(body);
+  if (!content) {
+    throw "No body or main tag found!";
+  }
+  const markdown = NodeHtmlMarkdown.translate(content);
   return { markdown, metadata: { title } };
 };
 
@@ -58,16 +61,23 @@ export function splitMarkdownBySections(markdown: string) {
   return sections;
 }
 
+export const generateEmbedding = async (input: string) => {
+  const res = await openai.createEmbedding({
+    input,
+    model: "text-embedding-ada-002",
+  });
+  if (!res.ok) {
+    throw res.statusText;
+  }
+  return (await res.json()) as ResponseTypes["createEmbedding"];
+};
+
 export async function generateEmbeddingFromSections(
   sections: { content: string; heading?: string }[]
 ) {
   return Promise.all(
     sections.map(async ({ content, heading }) => {
-      const res = await openai.createEmbedding({
-        model: "text-embedding-ada-002",
-        input: content,
-      });
-      const data = (await res.json()) as ResponseTypes["createEmbedding"];
+      const data = await generateEmbedding(content);
       const embedding = data.data[0]!.embedding;
       const tokenCount = data.usage.total_tokens;
       return {
