@@ -95,8 +95,20 @@ export const projectRouter = createTRPCRouter({
   create: protectedProcedure
     .input(createProjectSchema)
     .mutation(async ({ ctx, input }) => {
+      // Simple Rate Lmiting
+      const existingProjects = await ctx.db
+        .select({})
+        .from(projectUsersTable)
+        .where(eq(projectUsersTable.userId, ctx.session.user.id));
+      if (existingProjects.length + 1 > 1) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can not create more than 1 project as of now.",
+        });
+      }
+
       const [alreadyExists] = await ctx.db
-        .select()
+        .select({})
         .from(projectsTable)
         .where(eq(projectsTable.slug, input.slug));
       if (alreadyExists) {

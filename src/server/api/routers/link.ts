@@ -56,6 +56,19 @@ export const linkRouter = createTRPCRouter({
         ctx.session.user.id,
         input.projectSlug
       );
+
+      // Simple Rate Lmiting
+      const existingLinks = await ctx.db
+        .select({})
+        .from(linksTable)
+        .where(eq(linksTable.projectId, user.projectId));
+      if (existingLinks.length + input.data.urls.length > 2) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can not add more than 2 links in a project as of now.",
+        });
+      }
+
       const links = await ctx.db
         .insert(linksTable)
         .values(
