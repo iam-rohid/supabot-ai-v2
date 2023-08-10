@@ -1,6 +1,6 @@
 import { type NextApiRequest, type NextApiResponse } from "next";
 import { verifySignature } from "@upstash/qstash/nextjs";
-import { linksTable, type Link } from "@/lib/schema/links";
+import { linksTable } from "@/lib/schema/links";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { embeddingsTable } from "@/lib/schema/embeddings";
@@ -12,8 +12,8 @@ import {
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   console.log("If this is printed, the signature has already been verified");
-  const body = (await req.body) as Link;
-  const linkId = body.id;
+  console.log(JSON.stringify(req.body));
+  const linkId = req.body.id;
   if (!linkId) {
     return res.status(400).send("Link id not found");
   }
