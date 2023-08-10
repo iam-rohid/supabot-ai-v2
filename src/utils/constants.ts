@@ -39,3 +39,5 @@ export const THEMES = new Set([SYSTEM_THEME, "light", "dark"]);
 export const STORAGE_KEY = "theme";
 
 export const OPENAI_EMBEDDING_DIMENSIONS = 1536;
+
+export const ALLOWED_EMAILS = ["rohidul209@gmail.com"];
