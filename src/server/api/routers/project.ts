@@ -96,7 +96,7 @@ export const projectRouter = createTRPCRouter({
     .input(createProjectSchema)
     .mutation(async ({ ctx, input }) => {
       // Simple Rate Lmiting
-      if (ALLOWED_EMAILS.includes(ctx.session.user.email!)) {
+      if (!ALLOWED_EMAILS.includes(ctx.session.user.email!)) {
         const existingProjects = await ctx.db
           .select({})
           .from(projectUsersTable)

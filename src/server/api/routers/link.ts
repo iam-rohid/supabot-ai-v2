@@ -59,7 +59,7 @@ export const linkRouter = createTRPCRouter({
       );
 
       // Simple Rate Lmiting
-      if (ALLOWED_EMAILS.includes(ctx.session.user.email!)) {
+      if (!ALLOWED_EMAILS.includes(ctx.session.user.email!)) {
         const existingLinks = await ctx.db
           .select({})
           .from(linksTable)
