@@ -10,7 +10,7 @@ import { randomBytes } from "crypto";
 import { hashToken } from "@/server/auth";
 import { sendEmail } from "@/server/email";
 import ProjectInvitationEmail from "@/emails/project-invitation-email";
-import { APP_NAME } from "@/utils/constants";
+import { ALLOWED_EMAILS, APP_NAME } from "@/utils/constants";
 import { projectUsersTable } from "@/lib/schema/project-users";
 import { and, desc, eq } from "drizzle-orm";
 import { projectsTable } from "@/lib/schema/projects";
@@ -96,17 +96,18 @@ export const projectRouter = createTRPCRouter({
     .input(createProjectSchema)
     .mutation(async ({ ctx, input }) => {
       // Simple Rate Lmiting
-      const existingProjects = await ctx.db
-        .select({})
-        .from(projectUsersTable)
-        .where(eq(projectUsersTable.userId, ctx.session.user.id));
-      if (existingProjects.length + 1 > 1) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "You can not create more than 1 project as of now.",
-        });
+      if (ALLOWED_EMAILS.includes(ctx.session.user.email!)) {
+        const existingProjects = await ctx.db
+          .select({})
+          .from(projectUsersTable)
+          .where(eq(projectUsersTable.userId, ctx.session.user.id));
+        if (existingProjects.length + 1 > 1) {
+          throw new TRPCError({
+            code: "FORBIDDEN",
+            message: "You can not create more than 1 project as of now.",
+          });
+        }
       }
-
       const [alreadyExists] = await ctx.db
         .select({})
         .from(projectsTable)
