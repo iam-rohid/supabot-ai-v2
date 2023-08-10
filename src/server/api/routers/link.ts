@@ -2,7 +2,7 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { desc, eq } from "drizzle-orm";
 import { linksTable } from "@/lib/schema/links";
-import { requireProjectUser } from "./common";
+import { requireProjectUserBySlug } from "./common";
 import GetSitemapLinks from "get-sitemap-links";
 import { Client } from "@upstash/qstash";
 
@@ -14,15 +14,19 @@ export const linkRouter = createTRPCRouter({
   getAll: protectedProcedure
     .input(
       z.object({
-        projectId: z.string(),
+        projectSlug: z.string(),
       })
     )
     .query(async ({ ctx, input }) => {
-      await requireProjectUser(ctx.db, ctx.session.user.id, input.projectId);
+      const projectUser = await requireProjectUserBySlug(
+        ctx.db,
+        ctx.session.user.id,
+        input.projectSlug
+      );
       return ctx.db
         .select()
         .from(linksTable)
-        .where(eq(linksTable.projectId, input.projectId))
+        .where(eq(linksTable.projectId, projectUser.projectId))
         .orderBy(desc(linksTable.lastTrainedAt), desc(linksTable.updatedAt));
     }),
   fetchUrlsFromSitemap: protectedProcedure
@@ -39,19 +43,24 @@ export const linkRouter = createTRPCRouter({
   addLinks: protectedProcedure
     .input(
       z.object({
-        projectId: z.string(),
+        projectSlug: z.string(),
         data: z.object({
           urls: z.array(z.string().url()).min(1),
         }),
       })
     )
     .mutation(async ({ ctx, input }) => {
-      await requireProjectUser(ctx.db, ctx.session.user.id, input.projectId);
+      const user = await requireProjectUserBySlug(
+        ctx.db,
+        ctx.session.user.id,
+        input.projectSlug
+      );
       const links = await ctx.db
         .insert(linksTable)
         .values(
-          input.data.urls.map((url) => ({ url, projectId: input.projectId }))
+          input.data.urls.map((url) => ({ url, projectId: user.projectId }))
         )
+        .onConflictDoNothing()
         .returning();
 
       await Promise.allSettled(

@@ -18,16 +18,15 @@ import { Input } from "@/components/ui/input";
 import { DOMAIN } from "@/utils/constants";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@radix-ui/react-dialog";
-import { type Project } from "@/lib/schema/projects";
 import { api } from "@/utils/api";
 import ButtonLoadingSpinner from "@/components/button-loading-spinner";
 
 const AddSingleLinkForm = ({
   onOpenChange,
-  project,
+  projectSlug,
 }: {
   onOpenChange: (value: boolean) => void;
-  project: Project;
+  projectSlug: string;
 }) => {
   const form = useForm<CreateLinkData>({
     resolver: zodResolver(createLinkSchema),
@@ -39,7 +38,7 @@ const AddSingleLinkForm = ({
   const utils = api.useContext();
   const addLinks = api.link.addLinks.useMutation({
     onSuccess: () => {
-      utils.link.getAll.invalidate({ projectId: project.id });
+      utils.link.getAll.invalidate({ projectSlug });
       onOpenChange(false);
       toast({ title: "Link added" });
     },
@@ -53,7 +52,7 @@ const AddSingleLinkForm = ({
   });
 
   const handleSubmit = form.handleSubmit(({ url }) =>
-    addLinks.mutate({ projectId: project.id, data: { urls: [url] } })
+    addLinks.mutate({ projectSlug, data: { urls: [url] } })
   );
 
   return (

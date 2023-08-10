@@ -7,18 +7,17 @@ import {
 } from "../../ui/dialog";
 import { type UseModalReturning } from "../types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../ui/tabs";
-import { type Project } from "@/lib/schema/projects";
 import AddSingleLinkForm from "./add-single-link-form";
 import AddLinksFromSitemapForm from "./add-link-from-sitemap-form";
 
 export function AddLinkModal({
   open,
   onOpenChange,
-  project,
+  projectSlug,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  project: Project;
+  projectSlug: string;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -32,12 +31,15 @@ export function AddLinkModal({
             <TabsTrigger value="sitemap">Sitemap</TabsTrigger>
           </TabsList>
           <TabsContent value="url">
-            <AddSingleLinkForm onOpenChange={onOpenChange} project={project} />
+            <AddSingleLinkForm
+              onOpenChange={onOpenChange}
+              projectSlug={projectSlug}
+            />
           </TabsContent>
           <TabsContent value="sitemap">
             <AddLinksFromSitemapForm
               onOpenChange={onOpenChange}
-              project={project}
+              projectSlug={projectSlug}
             />
           </TabsContent>
         </Tabs>
@@ -47,14 +49,20 @@ export function AddLinkModal({
 }
 
 export const useAddLinkModal = ({
-  project,
+  projectSlug,
 }: {
-  project: Project;
+  projectSlug: string;
 }): UseModalReturning => {
   const [open, setOpen] = useState(false);
   const Modal = useCallback(
-    () => <AddLinkModal open={open} onOpenChange={setOpen} project={project} />,
-    [project, open]
+    () => (
+      <AddLinkModal
+        open={open}
+        onOpenChange={setOpen}
+        projectSlug={projectSlug}
+      />
+    ),
+    [projectSlug, open]
   );
   return [open, setOpen, Modal];
 };
