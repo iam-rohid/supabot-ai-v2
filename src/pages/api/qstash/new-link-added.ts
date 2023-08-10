@@ -4,11 +4,28 @@ import { linksTable } from "@/lib/schema/links";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { embeddingsTable } from "@/lib/schema/embeddings";
-import {
-  generateEmbeddingFromSections,
-  htmlToMarkdown,
-  splitMarkdownBySections,
-} from "@/server/training-utils";
+import { generateEmbedding } from "@/server/training-utils";
+import * as cheerio from "cheerio";
+import { NodeHtmlMarkdown } from "node-html-markdown";
+
+const fetchSectionsFromWebpage = async (url: string) => {
+  const res = await fetch(url);
+  const html = await res.text();
+
+  const $ = cheerio.load(html);
+  const title = $("title").text();
+  $(
+    "style, aside, footer, script, link, nav, head, a, img, picture, video, iframe, .navbar, .nav, .sidebar"
+  ).remove();
+  const content = $.html();
+  const markdown = NodeHtmlMarkdown.translate(content!);
+  const sections = markdown
+    .split(/\n\n/)
+    .map((para) => para.trim())
+    .filter((para) => para.length)
+    .map((para, i) => `${title} - Paragraph ${i}\n${para}`);
+  return sections;
+};
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { linkId, type } = req.body;
@@ -26,6 +43,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (!link) {
     return res.status(400).send("Link not found!");
   }
+
   // if it's training do nothing;
   if (link.trainingStatus === "training") {
     return res.status(400).send("Link is already in training!");
@@ -46,42 +64,26 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   }
 
   // fetch the website
-  let html: string;
-  try {
-    const res = await fetch(link.url);
-    html = await res.text();
-  } catch (error) {
-    return res.status(400).send("Failed to fetch link");
-  }
-
-  // convert it to markdown
-  const { markdown, metadata } = htmlToMarkdown(html);
-  // make chunks from markdown
-  const sections = splitMarkdownBySections(markdown);
+  const sections = await fetchSectionsFromWebpage(link.url);
   // generate embeddings with open ai
   try {
-    const sectionsWithEmbedding = await generateEmbeddingFromSections(sections);
-
     // add the generated embeddings to db
     await Promise.allSettled(
-      sectionsWithEmbedding.map((section) =>
-        db.insert(embeddingsTable).values({
+      sections.map(async (section) => {
+        const embedding = await generateEmbedding(section);
+        await db.insert(embeddingsTable).values({
           linkId,
-          content: section.content,
-          embedding: section.embedding,
-          tokenCount: section.tokenCount,
-          metadata: {
-            ...section.metadata,
-          },
-        })
-      )
+          content: section,
+          embedding: embedding.data[0]!.embedding,
+          tokenCount: embedding.usage.total_tokens,
+        });
+      })
     );
 
     // update the link status to success.
     await db
       .update(linksTable)
       .set({
-        metadata,
         trainingStatus: "trained",
         lastTrainedAt: new Date(Date.now()),
         updatedAt: new Date(),
