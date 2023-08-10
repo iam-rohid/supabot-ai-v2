@@ -4,6 +4,11 @@ import { desc, eq } from "drizzle-orm";
 import { linksTable } from "@/lib/schema/links";
 import { requireProjectUser } from "./common";
 import GetSitemapLinks from "get-sitemap-links";
+import { Client } from "@upstash/qstash";
+
+const c = new Client({
+  token: process.env.QSTASH_TOKEN!,
+});
 
 export const linkRouter = createTRPCRouter({
   getAll: protectedProcedure
@@ -48,6 +53,15 @@ export const linkRouter = createTRPCRouter({
           input.data.urls.map((url) => ({ url, projectId: input.projectId }))
         )
         .returning();
+
+      await Promise.allSettled(
+        links.map((link) =>
+          c.publishJSON({
+            body: link,
+            topic: "new-link-added",
+          })
+        )
+      );
       return links;
     }),
 });
