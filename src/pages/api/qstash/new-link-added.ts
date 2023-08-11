@@ -7,24 +7,20 @@ import { embeddingsTable } from "@/lib/schema/embeddings";
 import * as cheerio from "cheerio";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { openai } from "@/server/openai";
-import { ResponseTypes } from "openai-edge";
+import { type ResponseTypes } from "openai-edge";
+import { splitMarkdownBySections } from "@/server/training-utils";
 
 const fetchSectionsFromWebpage = async (url: string) => {
   const res = await fetch(url);
   const html = await res.text();
 
   const $ = cheerio.load(html);
-  const title = $("title").text();
   $(
-    "style, script, link, meta, img, picture, video, iframe, input, textarea"
+    "style, script, link, meta, img, svg, picture, video, iframe, input, textarea, nav, footer"
   ).remove();
-  const content = $.html();
+  const content = $("body").html();
   const markdown = NodeHtmlMarkdown.translate(content!);
-  const sections = markdown
-    .split(/\n\n/)
-    .map((para) => para.trim())
-    .filter((para) => para.length > 32)
-    .map((para, i) => `${title.slice(0, 48)} - Paragraph ${i}\n${para}`);
+  const sections = splitMarkdownBySections(markdown);
   return sections;
 };
 
@@ -70,19 +66,22 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // add the generated embeddings to db
     await Promise.allSettled(
-      sections.map(async (section) => {
+      sections.map(async ({ content, heading }) => {
         const embeddingResponse = await openai.createEmbedding({
           model: "text-embedding-ada-002",
-          input: section.replaceAll("\n", " "),
+          input: content.replaceAll("\n", " "),
         });
         const embeddingData =
           (await embeddingResponse.json()) as ResponseTypes["createEmbedding"];
         const embedding = embeddingData.data[0]?.embedding;
         await db.insert(embeddingsTable).values({
           linkId,
-          content: section,
+          content,
           embedding,
           tokenCount: embeddingData.usage.total_tokens,
+          metadata: {
+            heading,
+          },
         });
       })
     );
