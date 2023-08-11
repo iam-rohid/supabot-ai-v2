@@ -12,10 +12,7 @@ export default function MarketingHeader() {
     <header className="bg-card text-card-foreground">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex-1">
-          <Link
-            href={HOME_DOMAIN}
-            className="text-xl font-bold text-accent-foreground"
-          >
+          <Link href="/" className="text-xl font-bold text-accent-foreground">
             {APP_NAME}
           </Link>
         </div>

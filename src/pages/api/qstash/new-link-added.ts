@@ -5,23 +5,26 @@ import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { embeddingsTable } from "@/lib/schema/embeddings";
 import * as cheerio from "cheerio";
-import { NodeHtmlMarkdown } from "node-html-markdown";
 import { openai } from "@/server/openai";
 import { type ResponseTypes } from "openai-edge";
-import { splitMarkdownBySections } from "@/server/training-utils";
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
+import TurndownService from "turndown";
 
 const fetchSectionsFromWebpage = async (url: string) => {
   const res = await fetch(url);
   const html = await res.text();
-
   const $ = cheerio.load(html);
   $(
-    "style, script, link, meta, img, svg, picture, video, iframe, input, textarea, nav, footer"
+    "style, script, link, meta, img, svg, picture, video, iframe, input, textarea, nav, footer, a"
   ).remove();
-  const content = $("body").html();
-  const markdown = NodeHtmlMarkdown.translate(content!);
-  const sections = splitMarkdownBySections(markdown);
-  return sections;
+  const turndownService = new TurndownService();
+  const markdown = turndownService.turndown($.html());
+  const textSplitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
+    chunkSize: 1000,
+    chunkOverlap: 200,
+  });
+  const chunks = await textSplitter.splitText(markdown);
+  return chunks;
 };
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -66,7 +69,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // add the generated embeddings to db
     await Promise.allSettled(
-      sections.map(async ({ content, heading }) => {
+      sections.map(async (content) => {
         const embeddingResponse = await openai.createEmbedding({
           model: "text-embedding-ada-002",
           input: content.replaceAll("\n", " "),
@@ -79,9 +82,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
           content,
           embedding,
           tokenCount: embeddingData.usage.total_tokens,
-          metadata: {
-            heading,
-          },
         });
       })
     );
