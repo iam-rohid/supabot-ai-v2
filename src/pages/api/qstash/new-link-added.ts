@@ -4,9 +4,10 @@ import { linksTable } from "@/lib/schema/links";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { embeddingsTable } from "@/lib/schema/embeddings";
-import { generateEmbedding } from "@/server/training-utils";
 import * as cheerio from "cheerio";
 import { NodeHtmlMarkdown } from "node-html-markdown";
+import { openai } from "@/server/openai";
+import { ResponseTypes } from "openai-edge";
 
 const fetchSectionsFromWebpage = async (url: string) => {
   const res = await fetch(url);
@@ -70,12 +71,18 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // add the generated embeddings to db
     await Promise.allSettled(
       sections.map(async (section) => {
-        const embedding = await generateEmbedding(section);
+        const embeddingResponse = await openai.createEmbedding({
+          model: "text-embedding-ada-002",
+          input: section.replaceAll("\n", " "),
+        });
+        const embeddingData =
+          (await embeddingResponse.json()) as ResponseTypes["createEmbedding"];
+        const embedding = embeddingData.data[0]?.embedding;
         await db.insert(embeddingsTable).values({
           linkId,
           content: section,
-          embedding: embedding.data[0]!.embedding,
-          tokenCount: embedding.usage.total_tokens,
+          embedding,
+          tokenCount: embeddingData.usage.total_tokens,
         });
       })
     );
