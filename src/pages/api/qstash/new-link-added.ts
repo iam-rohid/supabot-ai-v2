@@ -16,7 +16,7 @@ const fetchSectionsFromWebpage = async (url: string) => {
   const $ = cheerio.load(html);
   const title = $("title").text();
   $(
-    "style, aside, footer, script, link, nav, head, a, img, picture, video, iframe, .navbar, .nav, .sidebar, input, textarea"
+    "style, script, link, meta, img, picture, video, iframe, input, textarea"
   ).remove();
   const content = $.html();
   const markdown = NodeHtmlMarkdown.translate(content!);
@@ -24,7 +24,7 @@ const fetchSectionsFromWebpage = async (url: string) => {
     .split(/\n\n/)
     .map((para) => para.trim())
     .filter((para) => para.length > 32)
-    .map((para, i) => `${title} - Paragraph ${i}\n${para}`);
+    .map((para, i) => `${title.slice(0, 48)} - Paragraph ${i}\n${para}`);
   return sections;
 };
 
