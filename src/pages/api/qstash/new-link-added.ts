@@ -15,14 +15,14 @@ const fetchSectionsFromWebpage = async (url: string) => {
   const $ = cheerio.load(html);
   const title = $("title").text();
   $(
-    "style, aside, footer, script, link, nav, head, a, img, picture, video, iframe, .navbar, .nav, .sidebar"
+    "style, aside, footer, script, link, nav, head, a, img, picture, video, iframe, .navbar, .nav, .sidebar, input, textarea"
   ).remove();
   const content = $.html();
   const markdown = NodeHtmlMarkdown.translate(content!);
   const sections = markdown
     .split(/\n\n/)
     .map((para) => para.trim())
-    .filter((para) => para.length)
+    .filter((para) => para.length > 32)
     .map((para, i) => `${title} - Paragraph ${i}\n${para}`);
   return sections;
 };
