@@ -4,28 +4,30 @@ import { linksTable } from "@/lib/schema/links";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
 import { embeddingsTable } from "@/lib/schema/embeddings";
-import * as cheerio from "cheerio";
-import { openai } from "@/server/openai";
-import { type ResponseTypes } from "openai-edge";
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import TurndownService from "turndown";
+import { CheerioWebBaseLoader } from "langchain/document_loaders/web/cheerio";
+import { HtmlToTextTransformer } from "langchain/document_transformers/html_to_text";
+import { type Document, addDocuments } from "@/server/vector-store";
 
-const fetchSectionsFromWebpage = async (url: string) => {
-  const res = await fetch(url);
-  const html = await res.text();
-  const $ = cheerio.load(html);
-  $(
-    "style, script, link, meta, img, svg, picture, video, iframe, input, textarea, nav, footer, a"
-  ).remove();
-  const turndownService = new TurndownService();
-  const markdown = turndownService.turndown($.html());
-  const textSplitter = RecursiveCharacterTextSplitter.fromLanguage("markdown", {
-    chunkSize: 1000,
-    chunkOverlap: 200,
-  });
-  const chunks = await textSplitter.splitText(markdown);
-  return chunks;
-};
+/*
+This function will get called from qstash when a user adds a new link to a project;
+*/
+
+async function getDocumentsFromWeb(url: string): Promise<Document[]> {
+  const loader = new CheerioWebBaseLoader(url);
+  const htmlDocs = await loader.load();
+
+  const splitter = RecursiveCharacterTextSplitter.fromLanguage("html");
+  const transformer = new HtmlToTextTransformer();
+
+  const sequence = splitter.pipe(transformer);
+
+  const docs = await sequence.invoke(htmlDocs);
+  return docs.map((doc) => ({
+    content: doc.pageContent,
+    metadata: doc.metadata,
+  }));
+}
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { linkId, type } = req.body;
@@ -36,10 +38,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
   // Get the link object and see if it available;
   const [link] = await db
-    .select()
+    .select({
+      trainingStatus: linksTable.trainingStatus,
+      url: linksTable.url,
+      projectId: linksTable.projectId,
+    })
     .from(linksTable)
-    .where(eq(linksTable.id, linkId))
-    .limit(1);
+    .where(eq(linksTable.id, linkId));
   if (!link) {
     return res.status(400).send("Link not found!");
   }
@@ -49,42 +54,24 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     return res.status(400).send("Link is already in training!");
   }
 
-  // change status to training
-  await db
-    .update(linksTable)
-    .set({
-      trainingStatus: "training",
-      updatedAt: new Date(),
-    })
-    .where(eq(linksTable.id, linkId));
-
-  // Delete all embeding for this link if type === retrain
-  if (type === "retrain") {
-    await db.delete(embeddingsTable).where(eq(embeddingsTable.linkId, linkId));
-  }
-
-  // fetch the website
-  const sections = await fetchSectionsFromWebpage(link.url);
-  // generate embeddings with open ai
   try {
-    // add the generated embeddings to db
-    await Promise.allSettled(
-      sections.map(async (content) => {
-        const embeddingResponse = await openai.createEmbedding({
-          model: "text-embedding-ada-002",
-          input: content.replaceAll("\n", " "),
-        });
-        const embeddingData =
-          (await embeddingResponse.json()) as ResponseTypes["createEmbedding"];
-        const embedding = embeddingData.data[0]?.embedding;
-        await db.insert(embeddingsTable).values({
-          linkId,
-          content,
-          embedding,
-          tokenCount: embeddingData.usage.total_tokens,
-        });
+    // change status to training
+    await db
+      .update(linksTable)
+      .set({
+        trainingStatus: "training",
+        updatedAt: new Date(),
       })
-    );
+      .where(eq(linksTable.id, linkId));
+    // Delete all embeding for this link if type === retrain
+    if (type === "retrain") {
+      await db
+        .delete(embeddingsTable)
+        .where(eq(embeddingsTable.linkId, linkId));
+    }
+    // fetch the website
+    const docs = await getDocumentsFromWeb(link.url);
+    await addDocuments(docs, link.projectId, linkId);
 
     // update the link status to success.
     await db
@@ -101,7 +88,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       .update(linksTable)
       .set({
         trainingStatus: "failed",
-        lastTrainedAt: new Date(Date.now()),
         updatedAt: new Date(),
       })
       .where(eq(linksTable.id, linkId));

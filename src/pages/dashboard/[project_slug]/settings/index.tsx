@@ -32,6 +32,7 @@ const Page: NextPageWithLayout = () => {
 
   return (
     <div className="grid gap-8">
+      <p>Your project Id: {project.data.id}</p>
       <UpdateProjecNameForm project={project.data} />
       <UpdateProjectSlugForm project={project.data} />
       <DeleteProjectForm project={project.data} />

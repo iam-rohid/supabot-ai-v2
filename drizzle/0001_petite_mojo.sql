@@ -1,0 +1,1 @@
+ALTER TABLE "embeddings" DROP COLUMN IF EXISTS "token_count";
