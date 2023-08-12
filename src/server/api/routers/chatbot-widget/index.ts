@@ -3,7 +3,6 @@ import { createTRPCRouter, publicProcedure } from "../../trpc";
 import { projectsTable } from "@/lib/schema/projects";
 import { eq } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
-import { chatRouter } from "./chat";
 
 export const chatbotRouter = createTRPCRouter({
   project: publicProcedure
@@ -25,5 +24,4 @@ export const chatbotRouter = createTRPCRouter({
       }
       return project;
     }),
-  chat: chatRouter,
 });
