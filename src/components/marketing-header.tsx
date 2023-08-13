@@ -1,6 +1,5 @@
 import { APP_NAME } from "@/utils/constants";
 import Link from "next/link";
-import React from "react";
 import NavLink from "./nav-link";
 import { useSession } from "next-auth/react";
 import { Button } from "./ui/button";
@@ -12,7 +11,10 @@ export default function MarketingHeader() {
     <header className="bg-card text-card-foreground">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex-1">
-          <Link href="/" className="text-xl font-bold text-accent-foreground">
+          <Link
+            href="/home"
+            className="text-xl font-bold text-accent-foreground"
+          >
             {APP_NAME}
           </Link>
         </div>

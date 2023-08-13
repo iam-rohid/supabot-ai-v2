@@ -1,15 +1,26 @@
 import withAuth from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export default withAuth({
-  callbacks: {
-    authorized: ({ token, req }) => {
-      if (req.nextUrl.pathname.startsWith("/dashboard")) {
-        return !!token;
-      }
-      return true;
+export default withAuth(
+  (req) => {
+    if (req.nextauth.token?.sub && req.nextUrl.pathname === "/") {
+      return NextResponse.redirect(new URL("/dashboard", req.url));
+    }
+    if (req.nextUrl.pathname === "/home") {
+      return NextResponse.rewrite(new URL("/", req.url));
+    }
+  },
+  {
+    callbacks: {
+      authorized: ({ token, req }) => {
+        if (req.nextUrl.pathname.startsWith("/dashboard")) {
+          return !!token;
+        }
+        return true;
+      },
     },
-  },
-  pages: {
-    signIn: "/signin",
-  },
-});
+    pages: {
+      signIn: "/signin",
+    },
+  }
+);
