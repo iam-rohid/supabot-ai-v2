@@ -20,14 +20,14 @@ import { Button } from "@/components/ui/button";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { api } from "@/utils/api";
 import ButtonLoadingSpinner from "@/components/button-loading-spinner";
+import { useProject } from "@/providers/project-provider";
 
 const AddSingleLinkForm = ({
   onOpenChange,
-  projectSlug,
 }: {
   onOpenChange: (value: boolean) => void;
-  projectSlug: string;
 }) => {
+  const { project } = useProject();
   const form = useForm<CreateLinkData>({
     resolver: zodResolver(createLinkSchema),
     defaultValues: {
@@ -38,7 +38,7 @@ const AddSingleLinkForm = ({
   const utils = api.useContext();
   const addLinks = api.link.addLinks.useMutation({
     onSuccess: () => {
-      utils.link.getAll.invalidate({ projectSlug });
+      utils.link.getAll.invalidate({ projectSlug: project.slug });
       onOpenChange(false);
       toast({ title: "Link added" });
     },
@@ -52,7 +52,7 @@ const AddSingleLinkForm = ({
   });
 
   const handleSubmit = form.handleSubmit(({ url }) =>
-    addLinks.mutate({ projectSlug, data: { urls: [url] } })
+    addLinks.mutate({ projectSlug: project.slug, data: { urls: [url] } })
   );
 
   return (

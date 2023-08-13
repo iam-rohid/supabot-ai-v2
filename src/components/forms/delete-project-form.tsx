@@ -7,10 +7,11 @@ import {
   CardDescription,
   CardFooter,
 } from "@/components/ui/card";
-import { type Project } from "@/lib/schema/projects";
+import { useProject } from "@/providers/project-provider";
 import { APP_NAME } from "@/utils/constants";
 
-export default function DeleteProjectForm({ project }: { project: Project }) {
+export default function DeleteProjectForm() {
+  const { project } = useProject();
   const [, setDeleteProjectModalOpen, DeleteProjectModal] =
     useDeleteProjectModal({ project });
 

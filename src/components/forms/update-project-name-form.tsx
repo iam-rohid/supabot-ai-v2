@@ -26,7 +26,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ButtonLoadingSpinner from "../button-loading-spinner";
-import { type Project } from "@/lib/schema/projects";
+import { useProject } from "@/providers/project-provider";
+import { useEffect } from "react";
 
 const updateNameSchema = z.object({
   name: z
@@ -37,11 +38,8 @@ const updateNameSchema = z.object({
 
 type UpateNameFormData = z.infer<typeof updateNameSchema>;
 
-export default function UpdateProjecNameForm({
-  project,
-}: {
-  project: Project;
-}) {
+export default function UpdateProjecNameForm() {
+  const { project } = useProject();
   const form = useForm<UpateNameFormData>({
     resolver: zodResolver(updateNameSchema),
     defaultValues: {
@@ -69,6 +67,10 @@ export default function UpdateProjecNameForm({
   const handleSubmit = form.handleSubmit((data) =>
     updateProject.mutate({ projectId: project.id, data })
   );
+
+  useEffect(() => {
+    form.setValue("name", project.name);
+  }, [form, project.name]);
 
   return (
     <Card>

@@ -28,6 +28,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Checkbox } from "@/components/ui/checkbox";
 import { api } from "@/utils/api";
 import ButtonLoadingSpinner from "@/components/button-loading-spinner";
+import { useProject } from "@/providers/project-provider";
 
 const sitemapSchema = z.object({
   sitemapUrl: z.string().url(),
@@ -37,11 +38,10 @@ type SitemapFormData = z.infer<typeof sitemapSchema>;
 
 const AddLinksFromSitemapForm = ({
   onOpenChange,
-  projectSlug,
 }: {
   onOpenChange: (value: boolean) => void;
-  projectSlug: string;
 }) => {
+  const { project } = useProject();
   const form = useForm<SitemapFormData>({
     resolver: zodResolver(sitemapSchema),
     defaultValues: {
@@ -54,7 +54,7 @@ const AddLinksFromSitemapForm = ({
   const utils = api.useContext();
   const addLinks = api.link.addLinks.useMutation({
     onSuccess: () => {
-      utils.link.getAll.invalidate({ projectSlug });
+      utils.link.getAll.invalidate({ projectSlug: project.slug });
       onOpenChange(false);
       toast({ title: "Links added" });
     },
@@ -91,7 +91,10 @@ const AddLinksFromSitemapForm = ({
     fetchUrlsFromSitemap.mutate(data)
   );
   const handleAddLinks = () =>
-    addLinks.mutate({ projectSlug, data: { urls: selectedLinks } });
+    addLinks.mutate({
+      projectSlug: project.slug,
+      data: { urls: selectedLinks },
+    });
 
   return (
     <div className="space-y-6">

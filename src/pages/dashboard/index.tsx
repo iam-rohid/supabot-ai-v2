@@ -3,7 +3,7 @@ import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardDescription,
+  CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -13,13 +13,14 @@ import DashboardLayout from "@/layouts/dashboard-layout";
 import { type NextPageWithLayout } from "@/types/next";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
+import { useTheme } from "next-themes";
 import Image from "next/image";
 import Link from "next/link";
 
 const Page: NextPageWithLayout = () => {
   const projects = api.project.getAll.useQuery();
   const [, setCreateProjectOpen, CreateProjectModal] = useCreateProjectModal();
-
+  const { resolvedTheme } = useTheme();
   const createNewProject = () => setCreateProjectOpen(true);
 
   return (
@@ -70,14 +71,23 @@ const Page: NextPageWithLayout = () => {
             ))}
           </div>
         ) : (
-          <Card className="mx-auto max-w-screen-md text-center">
+          <Card className="text-center">
             <CardHeader>
-              <CardTitle>You haven&apos;t created any projects yet!</CardTitle>
-              <CardDescription>
-                Click on the Create a Project button below to create your first
-                super chat bot.
-              </CardDescription>
+              <CardTitle>You don&apos;t have any projects yet!</CardTitle>
             </CardHeader>
+            <CardContent>
+              <Image
+                src={
+                  resolvedTheme === "dark"
+                    ? "/images/empty-box-dark.png"
+                    : "/images/empty-box.png"
+                }
+                width={512}
+                height={512}
+                alt="Empty Box"
+                className="mx-auto h-64 w-64 object-contain"
+              />
+            </CardContent>
             <CardFooter className="justify-center">
               <Button onClick={createNewProject}>Create a Project</Button>
             </CardFooter>

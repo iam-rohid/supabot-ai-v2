@@ -1,7 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Skeleton } from "@/components/ui/skeleton";
 import { type Project } from "@/lib/schema/projects";
 import { api } from "@/utils/api";
-import { Loader2 } from "lucide-react";
 import { type ReactNode, createContext, useContext } from "react";
 
 type ProjectContextType = {
@@ -21,9 +21,11 @@ export default function ProjectProvider({
 
   if (project.isLoading) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
+      <header className="border-b bg-card text-card-foreground">
+        <div className="container flex min-h-[8rem] items-center py-2">
+          <Skeleton className="h-8 w-32" />
+        </div>
+      </header>
     );
   }
 

@@ -16,14 +16,17 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Skeleton } from "./ui/skeleton";
+import { useToast } from "./ui/use-toast";
 
 export default function ProjectSwitcher() {
   const { data } = useSession();
   const router = useRouter();
+  const { toast } = useToast();
   const [, setCreateProjectModalOpen, CreateProjectModal] =
     useCreateProjectModal();
+
   const projects = api.project.getAll.useQuery();
 
   const currentProject = useMemo(
@@ -33,6 +36,16 @@ export default function ProjectSwitcher() {
         : null,
     [projects.data, router.query.pslug]
   );
+
+  useEffect(() => {
+    if (projects.isError) {
+      toast({
+        title: "Something went wrong!",
+        description: projects.error.message,
+        variant: "destructive",
+      });
+    }
+  }, [projects.error?.message, projects.isError, toast]);
 
   if (!data || projects.isLoading) {
     return <Skeleton className="-mx-2 h-10 w-32" />;
@@ -91,7 +104,14 @@ export default function ProjectSwitcher() {
             <DropdownMenuLabel>My Chabots</DropdownMenuLabel>
             {projects.data.map((item) => (
               <DropdownMenuItem key={item.id} asChild>
-                <Link href={`/dashboard/${item.slug}`}>
+                <Link
+                  href={{
+                    pathname: router.pathname,
+                    query: {
+                      pslug: item.slug,
+                    },
+                  }}
+                >
                   <Image
                     src={`/api/avatar/${item.id}`}
                     alt="Project logo"

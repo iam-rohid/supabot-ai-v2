@@ -2,7 +2,13 @@ import ButtonLoadingSpinner from "@/components/button-loading-spinner";
 import { useAddLinkModal } from "@/components/modals/add-link-modal";
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
-import { Card, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,6 +32,8 @@ import { type NextPageWithLayout } from "@/types/next";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { ExternalLink, MoreHorizontal, RefreshCcw, Trash } from "lucide-react";
+import { useTheme } from "next-themes";
+import Image from "next/image";
 import Link from "next/link";
 
 const statusColors: Record<LinkRow["trainingStatus"], string> = {
@@ -53,6 +61,7 @@ const Page: NextPageWithLayout = () => {
   );
   const { toast } = useToast();
   const utils = api.useContext();
+  const { resolvedTheme } = useTheme();
 
   const retrainLink = api.link.retrain.useMutation({
     onSuccess: () => {
@@ -95,7 +104,7 @@ const Page: NextPageWithLayout = () => {
         </header>
 
         <main className="container py-8">
-          <div className="rounded-lg border">
+          <Card>
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
@@ -124,7 +133,7 @@ const Page: NextPageWithLayout = () => {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </Card>
         </main>
       </>
     );
@@ -149,21 +158,34 @@ const Page: NextPageWithLayout = () => {
           )}
           Refresh
         </Button>
-        <AddLinkButton projectSlug={project.slug} />
+        <AddLinkButton />
       </PageHeader>
+
       <main className="container py-8">
         {links.data.length === 0 ? (
           <Card className="text-center">
             <CardHeader>
-              <CardTitle>You haven&apos;t added any links yet!</CardTitle>
+              <CardTitle>You don&apos;t have any links yet!</CardTitle>
             </CardHeader>
-
+            <CardContent>
+              <Image
+                src={
+                  resolvedTheme === "dark"
+                    ? "/images/empty-box-dark.png"
+                    : "/images/empty-box.png"
+                }
+                width={512}
+                height={512}
+                alt="Empty Box"
+                className="mx-auto h-64 w-64 object-contain"
+              />
+            </CardContent>
             <CardFooter className="justify-center">
-              <AddLinkButton projectSlug={project.slug} />
+              <AddLinkButton label="Add a Link" />
             </CardFooter>
           </Card>
         ) : (
-          <div className="rounded-lg border">
+          <Card>
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
@@ -235,7 +257,7 @@ const Page: NextPageWithLayout = () => {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </Card>
         )}
       </main>
     </>
@@ -246,11 +268,11 @@ Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default Page;
 
-const AddLinkButton = ({ projectSlug }: { projectSlug: string }) => {
-  const [, setOpen, Modal] = useAddLinkModal({ projectSlug });
+const AddLinkButton = ({ label = "Add Link" }: { label?: string }) => {
+  const [, setOpen, Modal] = useAddLinkModal();
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Add Link</Button>
+      <Button onClick={() => setOpen(true)}>{label}</Button>
       <Modal />
     </>
   );

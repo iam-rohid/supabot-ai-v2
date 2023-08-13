@@ -13,11 +13,9 @@ import AddLinksFromSitemapForm from "./add-link-from-sitemap-form";
 export function AddLinkModal({
   open,
   onOpenChange,
-  projectSlug,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  projectSlug: string;
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -31,16 +29,10 @@ export function AddLinkModal({
             <TabsTrigger value="sitemap">Sitemap</TabsTrigger>
           </TabsList>
           <TabsContent value="url">
-            <AddSingleLinkForm
-              onOpenChange={onOpenChange}
-              projectSlug={projectSlug}
-            />
+            <AddSingleLinkForm onOpenChange={onOpenChange} />
           </TabsContent>
           <TabsContent value="sitemap">
-            <AddLinksFromSitemapForm
-              onOpenChange={onOpenChange}
-              projectSlug={projectSlug}
-            />
+            <AddLinksFromSitemapForm onOpenChange={onOpenChange} />
           </TabsContent>
         </Tabs>
       </DialogContent>
@@ -48,21 +40,11 @@ export function AddLinkModal({
   );
 }
 
-export const useAddLinkModal = ({
-  projectSlug,
-}: {
-  projectSlug: string;
-}): UseModalReturning => {
+export const useAddLinkModal = (): UseModalReturning => {
   const [open, setOpen] = useState(false);
   const Modal = useCallback(
-    () => (
-      <AddLinkModal
-        open={open}
-        onOpenChange={setOpen}
-        projectSlug={projectSlug}
-      />
-    ),
-    [projectSlug, open]
+    () => <AddLinkModal open={open} onOpenChange={setOpen} />,
+    [open]
   );
   return [open, setOpen, Modal];
 };

@@ -25,7 +25,8 @@ import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import ButtonLoadingSpinner from "../button-loading-spinner";
-import { type Project } from "@/lib/schema/projects";
+import { useEffect } from "react";
+import { useProject } from "@/providers/project-provider";
 
 const updateSlugSchema = z.object({
   slug: z
@@ -36,11 +37,9 @@ const updateSlugSchema = z.object({
 
 type UpdateSlugFormData = z.infer<typeof updateSlugSchema>;
 
-export default function UpdateProjectSlugForm({
-  project,
-}: {
-  project: Project;
-}) {
+export default function UpdateProjectSlugForm() {
+  const { project } = useProject();
+
   const form = useForm<UpdateSlugFormData>({
     resolver: zodResolver(updateSlugSchema),
     defaultValues: { slug: project.slug },
@@ -70,6 +69,10 @@ export default function UpdateProjectSlugForm({
   const handleSubmit = form.handleSubmit((data) =>
     updateProject.mutate({ projectId: project.id, data })
   );
+
+  useEffect(() => {
+    form.setValue("slug", project.slug);
+  }, [form, project.slug]);
 
   return (
     <Card>
