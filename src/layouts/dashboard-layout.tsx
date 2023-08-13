@@ -56,6 +56,10 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                     label: "Links",
                   },
                   {
+                    href: `/dashboard/${pslug}/quick-prompts`,
+                    label: "Quick Prompts",
+                  },
+                  {
                     href: `/dashboard/${pslug}/chat`,
                     label: "Chat",
                   },

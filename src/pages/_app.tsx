@@ -6,6 +6,7 @@ import { type AppPropsWithLayout } from "@/types/next";
 import { ThemeProvider } from "next-themes";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/toaster";
+import Head from "next/head";
 
 const MyApp = ({
   Component,
@@ -17,6 +18,9 @@ const MyApp = ({
     <SessionProvider session={session}>
       <ThemeProvider defaultTheme="system" attribute="class" enableSystem>
         <TooltipProvider>
+          <Head>
+            <title>SupaBot AI</title>
+          </Head>
           {getLayout(<Component {...pageProps} />)}
           <Toaster />
         </TooltipProvider>

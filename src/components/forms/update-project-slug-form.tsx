@@ -10,7 +10,6 @@ import {
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormDescription,
   FormMessage,
@@ -19,7 +18,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { api } from "@/utils/api";
-import { APP_NAME } from "@/utils/constants";
+import { APP_NAME, DOMAIN } from "@/utils/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
@@ -90,9 +89,17 @@ export default function UpdateProjectSlugForm() {
               name="slug"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project Slug</FormLabel>
                   <FormControl>
-                    <Input placeholder="my-bot" {...field} />
+                    <div className="flex items-center">
+                      <div className="flex h-10 items-center rounded-l-md border border-r-0 bg-muted px-3 text-sm font-medium text-muted-foreground">
+                        {DOMAIN}/dashboard/
+                      </div>
+                      <Input
+                        placeholder="my-bot"
+                        className="flex-1 rounded-l-none"
+                        {...field}
+                      />
+                    </div>
                   </FormControl>
                   <FormDescription>Max 32 characters.</FormDescription>
                   <FormMessage />

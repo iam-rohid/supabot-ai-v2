@@ -12,7 +12,6 @@ import {
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormDescription,
   FormMessage,
@@ -88,7 +87,6 @@ export default function UpdateProjecNameForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Project Name</FormLabel>
                   <FormControl>
                     <Input placeholder="My Bot" {...field} />
                   </FormControl>

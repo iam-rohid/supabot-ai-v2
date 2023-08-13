@@ -3,22 +3,26 @@ import {
   projectUsersTable,
 } from "@/lib/schema/project-users";
 import { projectsTable } from "@/lib/schema/projects";
-import { type DB } from "@/server/db";
 import { TRPCError } from "@trpc/server";
 import { and, eq } from "drizzle-orm";
+import { type createTRPCContext } from "../trpc";
+
+type Ctx = Awaited<ReturnType<typeof createTRPCContext>>;
 
 export const requireProjectUser = async (
-  db: DB,
-  userId: string,
+  ctx: Ctx,
   projectId: string,
   roles: ProjectUserRole[] = ["owner", "admin", "member"]
 ) => {
-  const [projectUser] = await db
+  if (!ctx.session) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
+  }
+  const [projectUser] = await ctx.db
     .select()
     .from(projectUsersTable)
     .where(
       and(
-        eq(projectUsersTable.userId, userId),
+        eq(projectUsersTable.userId, ctx.session?.user.id),
         eq(projectUsersTable.projectId, projectId)
       )
     );
@@ -37,12 +41,14 @@ export const requireProjectUser = async (
   return projectUser;
 };
 export const requireProjectUserBySlug = async (
-  db: DB,
-  userId: string,
+  ctx: Ctx,
   projectSlug: string,
   roles: ProjectUserRole[] = ["owner", "admin", "member"]
 ) => {
-  const [projectUser] = await db
+  if (!ctx.session) {
+    throw new TRPCError({ code: "UNAUTHORIZED", message: "Unauthorized" });
+  }
+  const [projectUser] = await ctx.db
     .select({
       projectId: projectUsersTable.projectId,
       userId: projectUsersTable.userId,
@@ -54,7 +60,7 @@ export const requireProjectUserBySlug = async (
     .innerJoin(projectsTable, eq(projectsTable.id, projectUsersTable.projectId))
     .where(
       and(
-        eq(projectUsersTable.userId, userId),
+        eq(projectUsersTable.userId, ctx.session.user.id),
         eq(projectsTable.slug, projectSlug)
       )
     );

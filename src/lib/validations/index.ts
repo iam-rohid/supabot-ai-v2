@@ -12,3 +12,21 @@ export const updateProjectSchema = z.object({
 export const projectInvitationSchema = z.object({
   email: z.string().min(1).email(),
 });
+
+export const createQuickPromptSchema = z.object({
+  projectId: z.string().uuid(),
+  title: z
+    .string({ required_error: "Title is required" })
+    .min(1, "Title is required")
+    .max(80),
+  prompt: z
+    .string({ required_error: "Prompt is required" })
+    .min(1, "Prompt is required")
+    .max(500),
+});
+export const updateQuickPromptSchema = z.object({
+  id: z.string().uuid(),
+  projectId: z.string().uuid(),
+  title: z.string().max(80).optional(),
+  prompt: z.string().max(500).optional(),
+});

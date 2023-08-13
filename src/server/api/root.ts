@@ -3,11 +3,13 @@ import { createTRPCRouter } from "@/server/api/trpc";
 import { userRouter } from "./routers/user";
 import { linkRouter } from "./routers/link";
 import { chatbotRouter } from "./routers/chatbot-widget";
+import { quickPromptRouter } from "./routers/quick-prompt";
 
 export const appRouter = createTRPCRouter({
   project: projectRouter,
   user: userRouter,
   link: linkRouter,
+  quickPrompt: quickPromptRouter,
   chatbot: chatbotRouter,
 });
 
