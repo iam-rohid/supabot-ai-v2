@@ -1,7 +1,7 @@
 import { projectsTable } from "@/lib/schema/projects";
 import { db } from "@/server/db";
 import { eq } from "drizzle-orm";
-import { NextApiRequest, NextApiResponse } from "next";
+import { type NextApiRequest, type NextApiResponse } from "next";
 
 export default async function handler(
   req: NextApiRequest,

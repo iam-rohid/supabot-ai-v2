@@ -1,7 +1,9 @@
 import { type InferModel } from "drizzle-orm";
 import {
   index,
+  jsonb,
   pgTable,
+  text,
   timestamp,
   uniqueIndex,
   uuid,
@@ -17,6 +19,10 @@ export const projectsTable = pgTable(
     name: varchar("name", { length: 32 }).notNull(),
     slug: varchar("slug", { length: 32 }).notNull(),
     description: varchar("description", { length: 300 }),
+    metadata: jsonb("metadata").$type<Record<string, any>>(),
+    welcomeMessage: varchar("welcome_message", { length: 300 }),
+    theme: jsonb("theme").$type<Record<string, any>>().default({}).notNull(),
+    customCss: text("custom_css"),
   },
   (table) => {
     return {

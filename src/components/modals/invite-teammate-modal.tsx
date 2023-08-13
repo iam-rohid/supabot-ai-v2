@@ -26,17 +26,16 @@ import { projectInvitationSchema } from "@/lib/validations";
 import { type z } from "zod";
 import { DialogClose } from "@radix-ui/react-dialog";
 import ButtonLoadingSpinner from "../button-loading-spinner";
-import { type Project } from "@/lib/schema/projects";
+import { useProject } from "@/providers/project-provider";
 
 export default function InviteTeammateMoal({
   open,
   onOpenChange,
-  project,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  project: Project;
 }) {
+  const { project } = useProject();
   const form = useForm<z.infer<typeof projectInvitationSchema>>({
     resolver: zodResolver(projectInvitationSchema),
     defaultValues: {
@@ -114,22 +113,12 @@ export default function InviteTeammateMoal({
   );
 }
 
-export const useInviteTeammateModal = ({
-  project,
-}: {
-  project: Project;
-}): UseModalReturning => {
+export const useInviteTeammateModal = (): UseModalReturning => {
   const [open, setOpen] = useState(false);
 
   const Modal = useCallback(
-    () => (
-      <InviteTeammateMoal
-        open={open}
-        onOpenChange={setOpen}
-        project={project}
-      />
-    ),
-    [project, open]
+    () => <InviteTeammateMoal open={open} onOpenChange={setOpen} />,
+    [open]
   );
 
   return [open, setOpen, Modal];

@@ -9,26 +9,24 @@ import Link from "next/link";
 
 const SettingsLayout = ({ children }: { children: ReactNode }) => {
   const {
-    query: { project_slug },
+    query: { pslug },
     asPath,
   } = useRouter();
   const items: MenuItem[] = [
     {
       label: "General",
-      href: project_slug
-        ? `/dashboard/${project_slug}/settings`
-        : "/dashboard/settings",
+      href: pslug ? `/dashboard/${pslug}/settings` : "/dashboard/settings",
       end: true,
     },
-    ...(project_slug
+    ...(pslug
       ? [
           {
             label: "Billing",
-            href: `/dashboard/${project_slug}/settings/billing`,
+            href: `/dashboard/${pslug}/settings/billing`,
           },
           {
             label: "People",
-            href: `/dashboard/${project_slug}/settings/people`,
+            href: `/dashboard/${pslug}/settings/people`,
           },
         ]
       : []),

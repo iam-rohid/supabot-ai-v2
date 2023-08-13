@@ -28,10 +28,10 @@ export default function ProjectSwitcher() {
 
   const currentProject = useMemo(
     () =>
-      typeof router.query.project_slug === "string"
-        ? projects.data?.find((item) => item.slug === router.query.project_slug)
+      typeof router.query.pslug === "string"
+        ? projects.data?.find((item) => item.slug === router.query.pslug)
         : null,
-    [projects.data, router.query.project_slug]
+    [projects.data, router.query.pslug]
   );
 
   if (!data || projects.isLoading) {

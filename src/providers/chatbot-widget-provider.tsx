@@ -1,7 +1,7 @@
-import { Project } from "@/lib/schema/projects";
+import { type Project } from "@/lib/schema/projects";
 import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
-import { ReactNode, createContext, useContext } from "react";
+import { type ReactNode, createContext, useContext } from "react";
 
 type ChatbotContextType = {
   project: Project;

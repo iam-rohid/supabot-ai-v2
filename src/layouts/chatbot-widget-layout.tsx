@@ -1,7 +1,7 @@
 import ChatbotWidgetProvider from "@/providers/chatbot-widget-provider";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/router";
-import { ReactNode } from "react";
+import { type ReactNode } from "react";
 
 export default function ChatbotWidgetLayout({
   children,
@@ -10,7 +10,7 @@ export default function ChatbotWidgetLayout({
 }) {
   const {
     isReady,
-    query: { projectId },
+    query: { pid },
   } = useRouter();
   if (!isReady) {
     return (
@@ -19,12 +19,13 @@ export default function ChatbotWidgetLayout({
       </div>
     );
   }
-  if (typeof projectId !== "string") {
-    throw "projectId not found!";
+
+  if (typeof pid !== "string") {
+    throw "pid params not found!";
   }
 
   return (
-    <ChatbotWidgetProvider projectId={projectId}>
+    <ChatbotWidgetProvider projectId={pid}>
       <div className="flex h-screen w-screen flex-col">{children}</div>
     </ChatbotWidgetProvider>
   );

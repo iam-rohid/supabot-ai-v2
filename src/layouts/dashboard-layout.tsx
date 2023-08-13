@@ -1,18 +1,10 @@
-import ButtonLoadingSpinner from "@/components/button-loading-spinner";
 import ProjectSwitcher from "@/components/project-switcher";
 import ThemeSwitcher from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import UserButton from "@/components/user-button";
+import ProjectProvider from "@/providers/project-provider";
 import { type MenuItem } from "@/types/menu-item";
 import { cn } from "@/utils";
-import { api } from "@/utils/api";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
@@ -22,7 +14,7 @@ import { type ReactNode } from "react";
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
   const {
     isReady,
-    query: { project_slug },
+    query: { pslug },
   } = useRouter();
   const { status } = useSession();
 
@@ -52,19 +44,23 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         </div>
         <NavBar
           menuList={
-            typeof project_slug === "string"
+            typeof pslug === "string"
               ? [
                   {
-                    href: `/dashboard/${project_slug}`,
+                    href: `/dashboard/${pslug}`,
                     label: "Overview",
                     end: true,
                   },
                   {
-                    href: `/dashboard/${project_slug}/links`,
+                    href: `/dashboard/${pslug}/links`,
                     label: "Links",
                   },
                   {
-                    href: `/dashboard/${project_slug}/settings`,
+                    href: `/dashboard/${pslug}/chat`,
+                    label: "Chat",
+                  },
+                  {
+                    href: `/dashboard/${pslug}/settings`,
                     label: "Settings",
                   },
                 ]
@@ -82,8 +78,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
           }
         />
       </header>
-      {typeof project_slug === "string" ? (
-        <ProtectProject projectSlug={project_slug}>{children}</ProtectProject>
+      {typeof pslug === "string" ? (
+        <ProjectProvider projectSlug={pslug}>{children}</ProjectProvider>
       ) : (
         <>{children}</>
       )}
@@ -126,42 +122,42 @@ function NavBar({ menuList }: { menuList: MenuItem[] }) {
   );
 }
 
-const ProtectProject = ({
-  projectSlug,
-  children,
-}: {
-  projectSlug: string;
-  children: ReactNode;
-}) => {
-  const project = api.project.getBySlug.useQuery({ projectSlug });
-  if (project.isLoading) {
-    return (
-      <div className="flex flex-1 items-center justify-center">
-        <Loader2 className="h-6 w-6 animate-spin" />
-      </div>
-    );
-  }
-  if (project.isError) {
-    return <p>Error</p>;
-  }
-  if (!project.data) {
-    return (
-      <Card className="mx-auto my-8 max-w-screen-md">
-        <CardHeader>
-          <CardTitle>Something went wrong!</CardTitle>
-          <CardDescription>
-            Either you don&apos;t have permissions to view this project or this
-            project doesn&apos;t exist. Refresh to try again.
-          </CardDescription>
-        </CardHeader>
-        <CardFooter>
-          <Button onClick={() => project.refetch()}>
-            {project.isRefetching && <ButtonLoadingSpinner />}
-            Refresh
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
-  return <>{children}</>;
-};
+// const ProtectProject = ({
+//   projectSlug,
+//   children,
+// }: {
+//   projectSlug: string;
+//   children: ReactNode;
+// }) => {
+//   const project = api.project.getBySlug.useQuery({ projectSlug });
+//   if (project.isLoading) {
+//     return (
+//       <div className="flex flex-1 items-center justify-center">
+//         <Loader2 className="h-6 w-6 animate-spin" />
+//       </div>
+//     );
+//   }
+//   if (project.isError) {
+//     return <p>Error</p>;
+//   }
+//   if (!project.data) {
+//     return (
+//       <Card className="mx-auto my-8 max-w-screen-md">
+//         <CardHeader>
+//           <CardTitle>Something went wrong!</CardTitle>
+//           <CardDescription>
+//             Either you don&apos;t have permissions to view this project or this
+//             project doesn&apos;t exist. Refresh to try again.
+//           </CardDescription>
+//         </CardHeader>
+//         <CardFooter>
+//           <Button onClick={() => project.refetch()}>
+//             {project.isRefetching && <ButtonLoadingSpinner />}
+//             Refresh
+//           </Button>
+//         </CardFooter>
+//       </Card>
+//     );
+//   }
+//   return <>{children}</>;
+// };

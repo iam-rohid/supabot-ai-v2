@@ -15,7 +15,7 @@ import { useRouter } from "next/router";
 
 const Invitation = () => {
   const router = useRouter();
-  const slug = router.query.project_slug as string;
+  const slug = router.query.pslug as string;
   const { toast } = useToast();
 
   const utils = api.useContext();

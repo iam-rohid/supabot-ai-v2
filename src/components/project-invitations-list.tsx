@@ -19,13 +19,10 @@ import {
 } from "./ui/dropdown-menu";
 import { useToast } from "./ui/use-toast";
 import { Skeleton } from "./ui/skeleton";
-import { type Project } from "@/lib/schema/projects";
+import { useProject } from "@/providers/project-provider";
 
-export default function ProjectInvitationsList({
-  project,
-}: {
-  project: Project;
-}) {
+export default function ProjectInvitationsList() {
+  const { project } = useProject();
   const { toast } = useToast();
   const invitations = api.project.getInvitations.useQuery({
     projectId: project.id,
@@ -58,7 +55,7 @@ export default function ProjectInvitationsList({
         <p className="text-muted-foreground">
           You haven&apos;t invited anyone yet!
         </p>
-        <InviteTeammateButton project={project} />
+        <InviteTeammateButton />
       </div>
     );
   }

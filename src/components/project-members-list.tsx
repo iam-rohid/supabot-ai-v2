@@ -30,9 +30,10 @@ import {
 } from "./ui/alert-dialog";
 import ButtonLoadingSpinner from "./button-loading-spinner";
 import { Skeleton } from "./ui/skeleton";
-import { type Project } from "@/lib/schema/projects";
+import { useProject } from "@/providers/project-provider";
 
-export default function ProjectMembersList({ project }: { project: Project }) {
+export default function ProjectMembersList() {
+  const { project } = useProject();
   const members = api.project.getMembers.useQuery({ projectId: project.id });
   const { toast } = useToast();
   const utils = api.useContext();

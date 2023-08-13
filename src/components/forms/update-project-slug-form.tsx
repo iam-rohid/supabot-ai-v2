@@ -55,7 +55,7 @@ export default function UpdateProjectSlugForm({
       toast({ title: "Project slug updated" });
       router.push({
         pathname: router.pathname,
-        query: { project_slug: data.slug },
+        query: { pslug: data.slug },
       });
     },
     onError: (error) => {

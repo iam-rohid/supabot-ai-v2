@@ -44,15 +44,7 @@ export const projectRouter = createTRPCRouter({
     .input(z.object({ projectId: z.string() }))
     .query(async ({ ctx, input }) => {
       const [project] = await ctx.db
-        .select({
-          id: projectsTable.id,
-          createdAt: projectsTable.createdAt,
-          updatedAt: projectsTable.updatedAt,
-          name: projectsTable.name,
-          slug: projectsTable.slug,
-          description: projectsTable.description,
-          role: projectUsersTable.role,
-        })
+        .select()
         .from(projectUsersTable)
         .innerJoin(
           projectsTable,
@@ -64,21 +56,19 @@ export const projectRouter = createTRPCRouter({
             eq(projectsTable.id, input.projectId)
           )
         );
-      return project ?? null;
+      if (!project) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found!",
+        });
+      }
+      return project.projects;
     }),
   getBySlug: protectedProcedure
     .input(z.object({ projectSlug: z.string().min(1).max(32) }))
     .query(async ({ ctx, input }) => {
       const [project] = await ctx.db
-        .select({
-          id: projectsTable.id,
-          createdAt: projectsTable.createdAt,
-          updatedAt: projectsTable.updatedAt,
-          name: projectsTable.name,
-          slug: projectsTable.slug,
-          description: projectsTable.description,
-          role: projectUsersTable.role,
-        })
+        .select()
         .from(projectUsersTable)
         .innerJoin(
           projectsTable,
@@ -90,7 +80,13 @@ export const projectRouter = createTRPCRouter({
             eq(projectsTable.slug, input.projectSlug)
           )
         );
-      return project ?? null;
+      if (!project) {
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Project not found!",
+        });
+      }
+      return project.projects;
     }),
   create: protectedProcedure
     .input(createProjectSchema)

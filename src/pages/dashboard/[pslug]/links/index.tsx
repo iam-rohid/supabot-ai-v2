@@ -21,12 +21,12 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import DashboardLayout from "@/layouts/dashboard-layout";
 import { type Link as LinkRow } from "@/lib/schema/links";
+import { useProject } from "@/providers/project-provider";
 import { type NextPageWithLayout } from "@/types/next";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import { ExternalLink, MoreHorizontal, RefreshCcw, Trash } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/router";
 
 const statusColors: Record<LinkRow["trainingStatus"], string> = {
   idle: "#333333",
@@ -42,12 +42,10 @@ const statusLabels: Record<LinkRow["trainingStatus"], string> = {
 };
 
 const Page: NextPageWithLayout = () => {
-  const {
-    query: { project_slug },
-  } = useRouter();
+  const { project } = useProject();
   const links = api.link.getAll.useQuery(
     {
-      projectSlug: project_slug as string,
+      projectSlug: project.slug,
     },
     {
       refetchInterval: 1000 * 60, // Refetch every 1 min
@@ -58,7 +56,7 @@ const Page: NextPageWithLayout = () => {
 
   const retrainLink = api.link.retrain.useMutation({
     onSuccess: () => {
-      utils.link.getAll.refetch({ projectSlug: project_slug as string });
+      utils.link.getAll.refetch({ projectSlug: project.slug });
       toast({ title: "Link is retraining" });
     },
     onError: (error) => {
@@ -72,7 +70,7 @@ const Page: NextPageWithLayout = () => {
 
   const deleteLink = api.link.delete.useMutation({
     onSuccess: () => {
-      utils.link.getAll.refetch({ projectSlug: project_slug as string });
+      utils.link.getAll.refetch({ projectSlug: project.slug });
       toast({ title: "Link delete success" });
     },
     onError: (error) => {
@@ -151,7 +149,7 @@ const Page: NextPageWithLayout = () => {
           )}
           Refresh
         </Button>
-        <AddLinkButton projectSlug={project_slug as string} />
+        <AddLinkButton projectSlug={project.slug} />
       </PageHeader>
       <main className="container py-8">
         {links.data.length === 0 ? (
@@ -161,7 +159,7 @@ const Page: NextPageWithLayout = () => {
             </CardHeader>
 
             <CardFooter className="justify-center">
-              <AddLinkButton projectSlug={project_slug as string} />
+              <AddLinkButton projectSlug={project.slug} />
             </CardFooter>
           </Card>
         ) : (

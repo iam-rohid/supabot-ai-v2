@@ -1,4 +1,4 @@
-import { APP_NAME, HOME_DOMAIN } from "@/utils/constants";
+import { APP_NAME } from "@/utils/constants";
 import Link from "next/link";
 import React from "react";
 import NavLink from "./nav-link";
