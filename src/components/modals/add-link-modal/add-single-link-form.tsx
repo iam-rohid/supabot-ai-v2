@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { DOMAIN } from "@/utils/constants";
+import { BASE_URL } from "@/utils/constants";
 import { Button } from "@/components/ui/button";
 import { DialogClose } from "@radix-ui/react-dialog";
 import { api } from "@/utils/api";
@@ -66,7 +66,7 @@ const AddSingleLinkForm = ({
               <FormItem>
                 <FormLabel>Url</FormLabel>
                 <FormControl>
-                  <Input placeholder={`https://${DOMAIN}`} {...field} />
+                  <Input placeholder={`${BASE_URL}`} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
