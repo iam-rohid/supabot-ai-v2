@@ -1,4 +1,4 @@
-import { APP_NAME, HOME_DOMAIN } from "@/utils/constants";
+import { APP_NAME, BASE_URL } from "@/utils/constants";
 import {
   Body,
   Link,
@@ -33,7 +33,7 @@ export default function ProjectInvitationEmail({
         <Body className="mx-auto my-auto bg-white font-sans">
           <Container className="mx-auto my-10 max-w-[500px] rounded border border-solid border-gray-200 px-10 py-5">
             <Link
-              href={HOME_DOMAIN}
+              href={BASE_URL}
               className="my-8 block w-full text-center text-3xl font-bold text-accent-foreground"
             >
               {APP_NAME}

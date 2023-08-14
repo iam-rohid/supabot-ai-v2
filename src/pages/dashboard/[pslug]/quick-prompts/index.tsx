@@ -1,5 +1,6 @@
 import ButtonLoadingSpinner from "@/components/button-loading-spinner";
-import { useAddLinkModal } from "@/components/modals/add-link-modal";
+import { useAddQuickPromptModal } from "@/components/modals/add-quick-prompt-modal";
+import UpdateQuickPromptModal from "@/components/modals/update-quick-prompt-modal";
 import PageHeader from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,22 +18,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
   TableHeader,
   TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+  Table,
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import DashboardLayout from "@/layouts/dashboard-layout";
-import { type Link as LinkRow } from "@/lib/schema/links";
+import { type QuickPrompt } from "@/lib/schema/quick-prompts";
 import { useProject } from "@/providers/project-provider";
 import { type NextPageWithLayout } from "@/types/next";
 import { api } from "@/utils/api";
 import { formatDistanceToNow } from "date-fns";
 import {
-  ExternalLink,
+  Edit,
   Loader2,
   MoreHorizontal,
   Plus,
@@ -41,64 +42,31 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import Image from "next/image";
-import Link from "next/link";
-
-const statusColors: Record<LinkRow["trainingStatus"], string> = {
-  idle: "#333333",
-  failed: "#FF0000",
-  trained: "#50E3C2",
-  training: "#F5A623",
-};
-const statusLabels: Record<LinkRow["trainingStatus"], string> = {
-  idle: "Queued",
-  failed: "Error",
-  trained: "Trained",
-  training: "Training",
-};
+import { useState } from "react";
 
 const Page: NextPageWithLayout = () => {
   const { project } = useProject();
-  const links = api.link.getAll.useQuery(
-    {
-      projectSlug: project.slug,
-    },
-    {
-      refetchInterval: 1000 * 60, // Refetch every 1 min
-    }
-  );
-  const { toast } = useToast();
-  const utils = api.useContext();
   const { resolvedTheme } = useTheme();
+  const quickPrompts = api.quickPrompt.getAll.useQuery({
+    projectId: project.id,
+  });
+  const [updatePrompt, setUpdatePrompt] = useState<QuickPrompt | null>(null);
+  const { toast } = useToast();
 
-  const retrainLink = api.link.retrain.useMutation({
+  const deletePrompt = api.quickPrompt.delete.useMutation({
     onSuccess: () => {
-      utils.link.getAll.refetch({ projectSlug: project.slug });
-      toast({ title: "Link is retraining" });
+      quickPrompts.refetch(), toast({ title: "Quick prompt deleted" });
     },
     onError: (error) => {
       toast({
-        title: "Failed to retrain retrain",
+        title: "Failed to delete quick prompt",
         description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const deleteLink = api.link.delete.useMutation({
-    onSuccess: () => {
-      utils.link.getAll.refetch({ projectSlug: project.slug });
-      toast({ title: "Link delete success" });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to delete link",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
-
-  if (links.isLoading) {
+  if (quickPrompts.isLoading) {
     return (
       <>
         <header className="border-b bg-card text-card-foreground">
@@ -145,34 +113,33 @@ const Page: NextPageWithLayout = () => {
       </>
     );
   }
-  if (links.isError) {
+  if (quickPrompts.isError) {
     return <p>Error</p>;
   }
-
   return (
     <>
-      <PageHeader title="Links">
+      <PageHeader title="Quick Prompts">
         <Button
-          onClick={() => links.refetch()}
+          onClick={() => quickPrompts.refetch()}
           className="mr-2"
-          disabled={links.isRefetching}
+          disabled={quickPrompts.isRefetching}
           variant="outline"
         >
-          {links.isRefetching ? (
+          {quickPrompts.isRefetching ? (
             <ButtonLoadingSpinner />
           ) : (
             <RefreshCcw className="-ml-1 mr-2 h-4 w-4" />
           )}
           Refresh
         </Button>
-        <AddLinkButton />
+        <AddQuickPromptButton />
       </PageHeader>
 
       <main className="container py-8">
-        {links.data.length === 0 ? (
+        {quickPrompts.data.length === 0 ? (
           <Card className="text-center">
             <CardHeader>
-              <CardTitle>You don&apos;t have any links yet!</CardTitle>
+              <CardTitle>You don&apos;t have any quick prompts yet!</CardTitle>
             </CardHeader>
             <CardContent>
               <Image
@@ -188,7 +155,7 @@ const Page: NextPageWithLayout = () => {
               />
             </CardContent>
             <CardFooter className="justify-center">
-              <AddLinkButton label="Add a Link" />
+              <AddQuickPromptButton label="Add a Quick Prompt" />
             </CardFooter>
           </Card>
         ) : (
@@ -196,39 +163,31 @@ const Page: NextPageWithLayout = () => {
             <Table className="w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead>URL</TableHead>
-                  <TableHead>STATUS</TableHead>
-                  <TableHead>LAST TRAINED ON</TableHead>
+                  <TableHead>TITLE</TableHead>
+                  <TableHead>PROMPT</TableHead>
+                  <TableHead>LAST UPDATED</TableHead>
                   <TableHead className="w-12"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {links.data.map((link) => (
-                  <TableRow key={link.id}>
-                    <TableCell>{link.url}</TableCell>
+                {quickPrompts.data.map((prompt) => (
+                  <TableRow key={prompt.id}>
+                    <TableCell>{prompt.title}</TableCell>
+                    <TableCell>{prompt.prompt}</TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="h-2 w-2 rounded-full"
-                          style={{
-                            backgroundColor: statusColors[link.trainingStatus],
-                          }}
-                        />
-                        {statusLabels[link.trainingStatus]}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      {link.lastTrainedAt
-                        ? formatDistanceToNow(new Date(link.lastTrainedAt), {
-                            addSuffix: true,
-                          })
-                        : "-"}
+                      {formatDistanceToNow(prompt.updatedAt, {
+                        addSuffix: true,
+                      })}
                     </TableCell>
                     <TableCell className="py-0">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            {retrainLink.isLoading || deleteLink.isLoading ? (
+                          <Button
+                            disabled={deletePrompt.isLoading}
+                            variant="ghost"
+                            size="icon"
+                          >
+                            {deletePrompt.isLoading ? (
                               <Loader2 className="h-4 w-4 animate-spin" />
                             ) : (
                               <MoreHorizontal className="h-4 w-4" />
@@ -236,26 +195,19 @@ const Page: NextPageWithLayout = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent>
-                          <DropdownMenuItem asChild>
-                            <Link href={link.url} target="_blank">
-                              <ExternalLink className="mr-2 h-4 w-4" />
-                              Visit
-                            </Link>
-                          </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() =>
-                              retrainLink.mutate({
-                                linkId: link.id,
-                              })
-                            }
+                            onClick={() => setUpdatePrompt(prompt)}
                           >
-                            <RefreshCcw className="mr-2 h-4 w-4" />
-                            Retrain
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="focus:bg-destructive focus:text-destructive-foreground"
                             onClick={() =>
-                              deleteLink.mutate({ linkId: link.id })
+                              deletePrompt.mutate({
+                                id: prompt.id,
+                                projectId: prompt.projectId,
+                              })
                             }
                           >
                             <Trash className="mr-2 h-4 w-4" />
@@ -271,6 +223,17 @@ const Page: NextPageWithLayout = () => {
           </Card>
         )}
       </main>
+      {!!updatePrompt && (
+        <UpdateQuickPromptModal
+          open={!!updatePrompt}
+          onOpenChange={(value) => {
+            if (!value) {
+              setUpdatePrompt(null);
+            }
+          }}
+          quickPrompt={updatePrompt}
+        />
+      )}
     </>
   );
 };
@@ -279,8 +242,8 @@ Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
 
 export default Page;
 
-const AddLinkButton = ({ label = "Add Link" }: { label?: string }) => {
-  const [, setOpen, Modal] = useAddLinkModal();
+const AddQuickPromptButton = ({ label = "Add Prompt" }: { label?: string }) => {
+  const [, setOpen, Modal] = useAddQuickPromptModal();
   return (
     <>
       <Button onClick={() => setOpen(true)}>

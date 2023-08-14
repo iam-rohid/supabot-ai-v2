@@ -7,8 +7,10 @@ import { type MenuItem } from "@/types/menu-item";
 import { cn } from "@/utils";
 import { Loader2 } from "lucide-react";
 import { useSession } from "next-auth/react";
+import { ThemeProvider } from "next-themes";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import Script from "next/script";
 import { type ReactNode } from "react";
 
 const DashboardLayout = ({ children }: { children: ReactNode }) => {
@@ -27,7 +29,18 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <>
+    <ThemeProvider defaultTheme="system" attribute="class" enableSystem>
+      <Script
+        async
+        src="http://localhost:3000/chatbot-widget.js"
+        data-id="5f3ae903-a13f-43ea-88ee-5387b7416ff2"
+        data-name="SB-ChatBox"
+        data-color="#5F7FFF"
+        data-position="right"
+        data-x-margin="20"
+        data-y-margin="20"
+      ></Script>
+
       <header className="sticky top-0 z-20 border-b bg-card text-card-foreground">
         <div className="container flex h-16 items-center justify-between">
           <Button variant="ghost" size="icon" className="rounded-full" asChild>
@@ -56,8 +69,8 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
                     label: "Links",
                   },
                   {
-                    href: `/dashboard/${pslug}/chat`,
-                    label: "Chat",
+                    href: `/dashboard/${pslug}/quick-prompts`,
+                    label: "Quick Prompts",
                   },
                   {
                     href: `/dashboard/${pslug}/settings`,
@@ -83,7 +96,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       ) : (
         <>{children}</>
       )}
-    </>
+    </ThemeProvider>
   );
 };
 

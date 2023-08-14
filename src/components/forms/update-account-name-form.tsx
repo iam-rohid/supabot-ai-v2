@@ -10,7 +10,6 @@ import {
 import {
   FormField,
   FormItem,
-  FormLabel,
   FormControl,
   FormDescription,
   FormMessage,
@@ -86,7 +85,6 @@ export default function UpdateAccountNameForm() {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input placeholder="John Doe" {...field} />
                   </FormControl>

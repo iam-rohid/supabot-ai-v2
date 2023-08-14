@@ -153,10 +153,7 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      await requireProjectUser(ctx.db, ctx.session.user.id, input.projectId, [
-        "owner",
-        "admin",
-      ]);
+      await requireProjectUser(ctx, input.projectId, ["owner", "admin"]);
       if (input.data.slug) {
         const [alreadyExists] = await ctx.db
           .select()
@@ -194,9 +191,7 @@ export const projectRouter = createTRPCRouter({
   delete: protectedProcedure
     .input(z.object({ projectId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      await requireProjectUser(ctx.db, ctx.session.user.id, input.projectId, [
-        "owner",
-      ]);
+      await requireProjectUser(ctx, input.projectId, ["owner"]);
       const [deletedProject] = await ctx.db
         .delete(projectsTable)
         .where(eq(projectsTable.id, input.projectId))
@@ -216,7 +211,7 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      await requireProjectUser(ctx.db, ctx.session.user.id, input.projectId);
+      await requireProjectUser(ctx, input.projectId);
       return ctx.db
         .select()
         .from(projectUsersTable)
@@ -226,12 +221,10 @@ export const projectRouter = createTRPCRouter({
   removeMember: protectedProcedure
     .input(z.object({ projectId: z.string(), userId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const projectUser = await requireProjectUser(
-        ctx.db,
-        ctx.session.user.id,
-        input.projectId,
-        ["owner", "admin"]
-      );
+      const projectUser = await requireProjectUser(ctx, input.projectId, [
+        "owner",
+        "admin",
+      ]);
       const [member] = await ctx.db
         .select()
         .from(projectUsersTable)
@@ -278,7 +271,7 @@ export const projectRouter = createTRPCRouter({
       })
     )
     .query(async ({ ctx, input }) => {
-      await requireProjectUser(ctx.db, ctx.session.user.id, input.projectId);
+      await requireProjectUser(ctx, input.projectId);
       return ctx.db
         .select()
         .from(projectInvitationsTable)
@@ -302,10 +295,7 @@ export const projectRouter = createTRPCRouter({
           message: "Project Not Found!",
         });
       }
-      await requireProjectUser(ctx.db, ctx.session.user.id, input.projectId, [
-        "owner",
-        "admin",
-      ]);
+      await requireProjectUser(ctx, input.projectId, ["owner", "admin"]);
       const [invitationExists] = await ctx.db
         .select()
         .from(projectInvitationsTable)
@@ -390,10 +380,7 @@ export const projectRouter = createTRPCRouter({
   deleteInvitation: protectedProcedure
     .input(z.object({ projectId: z.string(), data: projectInvitationSchema }))
     .mutation(async ({ ctx, input }) => {
-      await requireProjectUser(ctx.db, ctx.session.user.id, input.projectId, [
-        "owner",
-        "admin",
-      ]);
+      await requireProjectUser(ctx, input.projectId, ["owner", "admin"]);
       const [invitationExists] = await ctx.db
         .select()
         .from(projectInvitationsTable)

@@ -21,6 +21,7 @@ export const projectsTable = pgTable(
     description: varchar("description", { length: 300 }),
     metadata: jsonb("metadata").$type<Record<string, any>>(),
     welcomeMessage: varchar("welcome_message", { length: 300 }),
+    placeholderText: varchar("placeholder_text", { length: 100 }),
     theme: jsonb("theme").$type<Record<string, any>>().default({}).notNull(),
     customCss: text("custom_css"),
   },

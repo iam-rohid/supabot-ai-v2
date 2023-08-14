@@ -8,6 +8,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -28,6 +29,7 @@ import {
 } from "@/lib/validations";
 import { DialogClose } from "@radix-ui/react-dialog";
 import ButtonLoadingSpinner from "../button-loading-spinner";
+import { APP_NAME, DOMAIN } from "@/utils/constants";
 
 export function CreateProjectModal({
   open,
@@ -56,7 +58,7 @@ export function CreateProjectModal({
     },
     onError: (error) => {
       toast({
-        title: "Failed to create Proejct",
+        title: "Failed to create Project",
         description: error.message,
         variant: "destructive",
       });
@@ -95,8 +97,20 @@ export function CreateProjectModal({
                   <FormItem>
                     <FormLabel>Project Slug</FormLabel>
                     <FormControl>
-                      <Input placeholder="my-bot" {...field} />
+                      <div className="flex items-center">
+                        <div className="flex h-10 items-center rounded-l-md border border-r-0 bg-muted px-3 text-sm font-medium text-muted-foreground">
+                          {DOMAIN}/dashboard/
+                        </div>
+                        <Input
+                          placeholder="my-bot"
+                          className="flex-1 rounded-l-none"
+                          {...field}
+                        />
+                      </div>
                     </FormControl>
+                    <FormDescription>
+                      This is your project&apos;s unique slug on {APP_NAME}
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

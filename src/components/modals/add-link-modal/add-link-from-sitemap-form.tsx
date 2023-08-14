@@ -12,7 +12,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { DOMAIN } from "@/utils/constants";
+import { BASE_URL } from "@/utils/constants";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { z } from "zod";
@@ -110,7 +110,7 @@ const AddLinksFromSitemapForm = ({
                     <FormLabel>Sitemap Url</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder={`https://${DOMAIN}/sitemap.xml`}
+                        placeholder={`${BASE_URL}/sitemap.xml`}
                         {...field}
                       />
                     </FormControl>

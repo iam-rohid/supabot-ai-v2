@@ -21,8 +21,7 @@ export const linkRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const projectUser = await requireProjectUserBySlug(
-        ctx.db,
-        ctx.session.user.id,
+        ctx,
         input.projectSlug
       );
       return ctx.db
@@ -52,11 +51,7 @@ export const linkRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await requireProjectUserBySlug(
-        ctx.db,
-        ctx.session.user.id,
-        input.projectSlug
-      );
+      const user = await requireProjectUserBySlug(ctx, input.projectSlug);
 
       // Simple Rate Lmiting
       if (!ALLOWED_EMAILS.includes(ctx.session.user.email!)) {
@@ -110,7 +105,7 @@ export const linkRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Link not found!" });
       }
       // Make sure user have access to the project
-      await requireProjectUser(ctx.db, ctx.session.user.id, link.projectId);
+      await requireProjectUser(ctx, link.projectId);
 
       if (!["trained", "failed"].includes(link.trainingStatus)) {
         throw new TRPCError({
@@ -143,7 +138,7 @@ export const linkRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND", message: "Link not found!" });
       }
       // Make sure user have access to the project
-      await requireProjectUser(ctx.db, ctx.session.user.id, link.projectId);
+      await requireProjectUser(ctx, link.projectId);
       if (!["trained", "failed"].includes(link.trainingStatus)) {
         throw new TRPCError({
           code: "FORBIDDEN",
