@@ -4,8 +4,6 @@ import Link from "next/link";
 import { type ReactNode } from "react";
 import AuthButtonGroup from "./auth-button-group";
 
-export const runtime = "edge";
-
 export default function Layout({ children }: { children: ReactNode }) {
   return (
     <>
