@@ -1,10 +1,8 @@
 import { Button } from "@/components/ui/button";
-import MarketingLayout from "@/layouts/marketing-layout";
-import { type NextPageWithLayout } from "@/types/next";
 import { ChevronRight, GithubIcon } from "lucide-react";
 import Link from "next/link";
 
-const Page: NextPageWithLayout = () => {
+export default function Page() {
   return (
     <main>
       <section className="my-32">
@@ -34,8 +32,4 @@ const Page: NextPageWithLayout = () => {
       </section>
     </main>
   );
-};
-
-Page.getLayout = (page) => <MarketingLayout>{page}</MarketingLayout>;
-
-export default Page;
+}
