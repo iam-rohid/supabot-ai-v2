@@ -3,6 +3,7 @@ import { APP_NAME } from "@/utils/constants";
 import Link from "next/link";
 import { type ReactNode } from "react";
 import AuthButtonGroup from "./auth-button-group";
+import Script from "next/script";
 
 export const runtime = "edge";
 
@@ -25,6 +26,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               inactiveClassName="text-muted-foreground hover:text-accent-foreground"
               activeClassName="text-accent-foreground"
               href="/about"
+              prefetch={false}
             >
               About
             </NavLink>
@@ -33,6 +35,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               inactiveClassName="text-muted-foreground hover:text-accent-foreground"
               activeClassName="text-accent-foreground"
               href="/blog"
+              prefetch={false}
             >
               Blog
             </NavLink>
@@ -41,6 +44,7 @@ export default function Layout({ children }: { children: ReactNode }) {
               inactiveClassName="text-muted-foreground hover:text-accent-foreground"
               activeClassName="text-accent-foreground"
               href="/pricing"
+              prefetch={false}
             >
               Pricing
             </NavLink>
@@ -52,6 +56,14 @@ export default function Layout({ children }: { children: ReactNode }) {
       </header>
 
       {children}
+
+      <Script
+        async
+        src="https://supabotai.com/chatbot-widget.js"
+        data-id="5f3ae903-a13f-43ea-88ee-5387b7416ff2"
+        data-name="SB-ChatBox"
+        strategy="lazyOnload"
+      ></Script>
     </>
   );
 }

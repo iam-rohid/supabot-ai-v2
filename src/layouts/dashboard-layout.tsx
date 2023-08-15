@@ -30,17 +30,6 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
 
   return (
     <ThemeProvider defaultTheme="system" attribute="class" enableSystem>
-      <Script
-        async
-        src="http://localhost:3000/chatbot-widget.js"
-        data-id="5f3ae903-a13f-43ea-88ee-5387b7416ff2"
-        data-name="SB-ChatBox"
-        data-color="#5F7FFF"
-        data-position="right"
-        data-x-margin="20"
-        data-y-margin="20"
-      ></Script>
-
       <header className="sticky top-0 z-20 border-b bg-card text-card-foreground">
         <div className="container flex h-16 items-center justify-between">
           <Button variant="ghost" size="icon" className="rounded-full" asChild>
@@ -96,6 +85,14 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
       ) : (
         <>{children}</>
       )}
+
+      <Script
+        async
+        src="http://localhost:3000/chatbot-widget.js"
+        data-id="5f3ae903-a13f-43ea-88ee-5387b7416ff2"
+        data-name="SB-ChatBox"
+        strategy="lazyOnload"
+      ></Script>
     </ThemeProvider>
   );
 };
