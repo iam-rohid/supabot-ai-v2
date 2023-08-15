@@ -12,7 +12,7 @@
   if (!projectId) {
     throw "data-id is required";
   }
-  const baseUrl = "http://localhost:3000";
+  const baseUrl = "https://supabotai.com";
   const res = await fetch(`${baseUrl}/api/projects/${projectId}`);
   const project = await res.json();
   if (!res.ok) {

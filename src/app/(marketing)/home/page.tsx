@@ -16,13 +16,13 @@ export default function Page() {
           </p>
           <div className="mt-16 flex items-center justify-center gap-4">
             <Button asChild size="lg">
-              <Link href="/signin">
+              <Link href="/signin" prefetch={false}>
                 Start for Free
                 <ChevronRight className="-mr-1 ml-2 h-5 w-5" />
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg">
-              <Link href="/signin">
+              <Link href="/signin" prefetch={false}>
                 <GithubIcon className="-ml-1 mr-2 h-5 w-5" />
                 Star on Github
               </Link>
