@@ -1,5 +1,7 @@
+"use client";
+
 import Link, { type LinkProps } from "next/link";
-import { useRouter } from "next/router";
+import { usePathname } from "next/navigation";
 import { forwardRef, useEffect, useState } from "react";
 
 export type NavLinkProps = Omit<
@@ -21,13 +23,18 @@ const NavLink = forwardRef<HTMLAnchorElement, NavLinkProps>(
     ref
   ) => {
     const [isActive, setIsActive] = useState(false);
-    const { asPath } = useRouter();
+    const pathname = usePathname();
 
     useEffect(() => {
+      if (!pathname) {
+        return;
+      }
       setIsActive(
-        end ? asPath === href.toString() : asPath.startsWith(href.toString())
+        end
+          ? pathname === href.toString()
+          : pathname.startsWith(href.toString())
       );
-    }, [end, href, asPath]);
+    }, [end, href, pathname]);
 
     return (
       <Link
