@@ -11,9 +11,12 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import { type Session } from "next-auth";
 import superjson from "superjson";
-import { ZodError } from "zod";
+import { z, ZodError } from "zod";
 import { getServerAuthSession } from "@/server/auth";
 import { db } from "../db";
+import { projectsTable } from "@/lib/schema/projects";
+import { and, eq } from "drizzle-orm";
+import { projectUsersTable } from "@/lib/schema/project-users";
 
 /**
  * 1. CONTEXT
@@ -127,4 +130,35 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = publicProcedure.use(enforceUserIsAuthed);
+
+const projectExists = t.middleware(async ({ ctx, next, input }) => {
+  const { projectId } = input as any;
+  if (typeof projectId !== "string") {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "projectId not found!",
+    });
+  }
+  const project = await ctx.db
+    .select()
+    .from(projectsTable)
+    .where(eq(projectsTable.id, projectId));
+
+  return next({
+    ctx: {
+      project,
+    },
+  });
+});
+
+export const projectExistsProcedure = publicProcedure
+  .input(z.object({ projectId: z.string() }))
+  .use(projectExists);
+
+// const myProject = t.middleware(async ({ctx, next}) => {
+//   const users = await ctx.db.select().from(projectUsersTable).where(and(eq(projectUsersTable.projectId, ctx.project.id), eq(projectUsersTable.userId, ctx.session?.user.id)))
+//   return next()
+// })
+
+// export const myProjectProcedure = projectExistsProcedure.use(myProject)

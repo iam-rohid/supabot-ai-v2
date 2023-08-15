@@ -30,3 +30,13 @@ export const updateQuickPromptSchema = z.object({
   title: z.string().max(80).optional(),
   prompt: z.string().max(500).optional(),
 });
+
+export const createChatSchema = z.object({
+  projectId: z.string().uuid(),
+  user: z
+    .object({
+      name: z.string().optional(),
+      email: z.string().email(),
+    })
+    .optional(),
+});

@@ -27,9 +27,9 @@ export default function ChatbotWidgetLayout({
 
   return (
     <ChatbotWidgetProvider projectId={pid}>
-      <div className="flex h-screen w-screen flex-col overflow-hidden bg-secondary text-secondary-foreground">
+      <div className="flex h-screen w-screen flex-col overflow-hidden">
         {children}
-        <div className="flex items-center justify-center border-t bg-card px-2 py-1">
+        <div className="flex items-center justify-center border-t bg-card p-2">
           <p className="text-sm text-muted-foreground">
             Powered by{" "}
             <a

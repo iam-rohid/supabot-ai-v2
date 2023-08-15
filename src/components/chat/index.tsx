@@ -102,7 +102,7 @@ export default function Chatbox() {
           }}
         >
           <TextareaAutosize
-            className="flex-1 resize-none p-4 outline-none"
+            className="flex-1 resize-none bg-transparent p-4 outline-none"
             autoFocus
             placeholder={project.placeholderText || "Send a message..."}
             value={message}
@@ -151,10 +151,10 @@ const MessageItem = ({ message }: { message: Message }) => {
         </p>
         <div
           className={cn(
-            "rounded-2xl shadow-sm",
+            "rounded-2xl",
             message.role === "user"
-              ? "rounded-br-sm bg-primary text-primary-foreground"
-              : "rounded-bl-sm bg-card text-card-foreground"
+              ? "rounded-tr-sm bg-primary text-primary-foreground"
+              : "rounded-tl-sm bg-secondary text-secondary-foreground"
           )}
         >
           <ReactMarkdown

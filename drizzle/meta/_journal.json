@@ -50,6 +50,13 @@
       "when": 1691921523817,
       "tag": "0006_first_famine",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1692027355045,
+      "tag": "0007_early_plazm",
+      "breakpoints": true
     }
   ]
 }

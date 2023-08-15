@@ -1,10 +1,11 @@
 import MarketingHeader from "@/components/marketing-header";
+import { ThemeProvider } from "next-themes";
 import Script from "next/script";
 import { type ReactNode } from "react";
 
 export default function MarketingLayout({ children }: { children: ReactNode }) {
   return (
-    <>
+    <ThemeProvider defaultTheme="system" attribute="class" enableSystem>
       <Script
         async
         src="http://localhost:3000/chatbot-widget.js"
@@ -18,6 +19,6 @@ export default function MarketingLayout({ children }: { children: ReactNode }) {
 
       <MarketingHeader />
       {children}
-    </>
+    </ThemeProvider>
   );
 }

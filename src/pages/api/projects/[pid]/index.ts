@@ -7,10 +7,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { projectId } = req.query;
+  const { pid } = req.query;
   const [project] = await db
     .select()
     .from(projectsTable)
-    .where(eq(projectsTable.id, projectId as string));
+    .where(eq(projectsTable.id, pid as string));
   return res.json(project);
 }

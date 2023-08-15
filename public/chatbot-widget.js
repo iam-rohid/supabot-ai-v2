@@ -1,21 +1,31 @@
-!(function () {
+!(async function () {
   const BTN_ID = "sb-btn";
   const IFRAME_ID = "sb-iframe";
-  const OVERLAY_ID = "sb-overlay";
   const MSG_BOX_ID = "sb-msg-box";
 
   const s = document.querySelector('script[data-name="SB-ChatBox"]');
   if (!s) {
     return;
   }
+  const projectId = s.dataset.id;
+
+  if (!projectId) {
+    throw "data-id is required";
+  }
+  const baseUrl = "http://localhost:3000";
+  const res = await fetch(`${baseUrl}/api/projects/${projectId}`);
+  const project = await res.json();
+  if (!res.ok) {
+    throw res.statusText;
+  }
 
   const xm = s.dataset.xMargin || "18";
   const ym = s.dataset.yMargin || "18";
-  const p = s.dataset.position || "right";
+  const p = project.theme?.position || "right";
 
   const btn = document.createElement("button");
   btn.id = BTN_ID;
-  btn.style.backgroundColor = s.dataset.color;
+  btn.style.backgroundColor = project.theme?.primary_color || "#6366F1";
   btn.style.position = "fixed";
   btn.style.display = "flex";
   btn.style.alignItems = "center";
@@ -42,16 +52,13 @@
 
   const iframe = document.createElement("iframe");
   iframe.id = IFRAME_ID;
-  iframe.src =
-    `http://localhost:3000/widget/chatbot/${s.dataset.id}?` +
-    "color=" +
-    encodeURIComponent(s.dataset.color);
+  iframe.src = `${baseUrl}/widget/chatbot/${s.dataset.id}`;
   iframe.style.position = "fixed";
-  iframe.style.transition = "all 0.3s ease 0s";
+  iframe.style.transition = "opacity 0.3s ease, transform 0.3s ease";
   iframe.style.width = "100%";
-  iframe.style.height = "100%";
+  iframe.style.height = "620px";
   iframe.style.maxWidth = "400px";
-  iframe.style.maxHeight = "620px";
+  iframe.style.maxHeight = "80vh";
   iframe.style.borderRadius = "10px";
   iframe.style.boxShadow = "rgba(0, 0, 0, 0.15) 0px 8px 32px";
   iframe.style.zIndex = 100;
@@ -67,13 +74,6 @@
     iframe.style.transformOrigin = "right bottom";
     iframe.style.right = xm + "px";
   }
-
-  const overlay = document.createElement("div");
-  overlay.id = OVERLAY_ID;
-  overlay.style.position = "fixed";
-  overlay.style.cursor = "pointer";
-  overlay.style.inset = 0;
-  overlay.style.zIndex = 100;
 
   const msgBox = document.createElement("div");
   msgBox.id = MSG_BOX_ID;
@@ -102,7 +102,6 @@
 
   document.body.append(btn);
   document.body.append(iframe);
-  document.body.append(overlay);
   document.body.append(msgBox);
 
   const closeMessageBox = () => {
@@ -128,34 +127,22 @@
   let chatboxOpen = false;
 
   const showChatbox = () => {
-    btn.innerHTML =
-      "<img src='http://localhost:3000/x-icon.svg' alt='Chatbot Icon' style='width: 32px; height: 32px; object-fit: contain; padding: 0; margin: 0; pointer-events: none;' />";
-    overlay.style.opacity = 1;
-    overlay.style.pointerEvents = "auto";
+    btn.innerHTML = `<img src='${baseUrl}/x-icon.svg' alt='Chatbot Icon' style='width: 32px; height: 32px; object-fit: contain; padding: 0; margin: 0; pointer-events: none;' />`;
     iframe.style.opacity = 1;
     iframe.style.pointerEvents = "auto";
     iframe.style.transform = "scale(1)";
-    document.documentElement.style.overflow = "hidden";
     chatboxOpen = true;
   };
 
   const hideChatbox = () => {
-    btn.innerHTML =
-      "<img src='http://localhost:3000/chatbot-icon.svg' alt='Chatbot Icon' style='width: 32px; height: 32px; object-fit: contain; padding: 0; margin: 0; pointer-events: none;' />";
-    overlay.style.opacity = 0;
-    overlay.style.pointerEvents = "none";
+    btn.innerHTML = `<img src='${baseUrl}/chatbot-icon.svg' alt='Chatbot Icon' style='width: 32px; height: 32px; object-fit: contain; padding: 0; margin: 0; pointer-events: none;' />`;
     iframe.style.opacity = 0;
     iframe.style.pointerEvents = "none";
     iframe.style.transform = "scale(0)";
-    document.documentElement.style.overflow = "unset";
     chatboxOpen = false;
   };
 
   hideChatbox();
-
-  overlay.onclick = () => {
-    hideChatbox();
-  };
 
   btn.onclick = () => {
     if (!chatboxOpen) {
@@ -166,13 +153,23 @@
     }
   };
 
-  btn.onmouseover = () => {
-    btn.style.transform = "scale(1.1)";
-  };
+  let hovering = false;
   btn.onmousedown = () => {
     btn.style.transform = "scale(0.9)";
   };
+  btn.onmouseup = () => {
+    if (hovering) {
+      btn.style.transform = "scale(1.1)";
+    } else {
+      btn.style.transform = "scale(1)";
+    }
+  };
+  btn.onmouseover = () => {
+    btn.style.transform = "scale(1.1)";
+    hovering = true;
+  };
   btn.onmouseleave = () => {
     btn.style.transform = "scale(1)";
+    hovering = false;
   };
 })();

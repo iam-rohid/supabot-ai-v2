@@ -2,7 +2,6 @@ import { type Project } from "@/lib/schema/projects";
 import { api } from "@/utils/api";
 import Color from "color";
 import { Loader2 } from "lucide-react";
-import { useRouter } from "next/router";
 import { type ReactNode, createContext, useContext, useEffect } from "react";
 
 type ChatbotContextType = {
@@ -27,12 +26,13 @@ const ChatbotWidgetProvider = ({
   projectId: string;
   children: ReactNode;
 }) => {
-  const router = useRouter();
   const project = api.chatbot.project.useQuery({ id: projectId });
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const primaryColor = new Color(router.query.color || "#6366F1").hsl();
+      const primaryColor = new Color(
+        project.data?.theme.primary_color || "#6366F1"
+      ).hsl();
       const primaryForegroundColor = new Color("#fff");
 
       document.getElementById("custom-color")?.remove();
@@ -49,7 +49,7 @@ const ChatbotWidgetProvider = ({
       styleNode.id = "custom-color";
       document.head.append(styleNode);
     }
-  }, [router.query, router.query.color]);
+  }, [project.data?.theme.primary_color]);
 
   useEffect(() => {
     if (project.data?.customCss) {
