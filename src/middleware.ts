@@ -6,8 +6,8 @@ export default withAuth(
     if (req.nextauth.token?.sub && req.nextUrl.pathname === "/") {
       return NextResponse.redirect(new URL("/dashboard", req.url));
     }
-    if (req.nextUrl.pathname === "/home") {
-      return NextResponse.rewrite(new URL("/", req.url));
+    if (req.nextUrl.pathname === "/") {
+      return NextResponse.rewrite(new URL("/home", req.url));
     }
   },
   {
