@@ -6,6 +6,7 @@ import AuthButtonGroup from "./auth-button-group";
 import Script from "next/script";
 
 export const runtime = "edge";
+export const revalidate = 60 * 60 * 24; // One day of caching
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (

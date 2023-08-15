@@ -22,6 +22,9 @@ const config = {
     dangerouslyAllowSVG: true,
     domains: ["avatars.githubusercontent.com"],
   },
+  experimental: {
+    serverActions: true,
+  },
 
   headers: async () => {
     return [
