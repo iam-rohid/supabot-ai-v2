@@ -1,11 +1,18 @@
 import SignInForm from "@/components/forms/signin-form";
-import { getServerAuthSession } from "@/server/auth";
-import { type NextPageWithLayout } from "@/types/next";
+import { authOptions } from "@/server/auth";
 import { APP_NAME } from "@/utils/constants";
-import { type GetServerSideProps } from "next";
+import { getServerSession } from "next-auth";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
-const SignIn: NextPageWithLayout = () => {
+export default async function Page() {
+  const session = await getServerSession(authOptions);
+
+  if (session?.user) {
+    redirect("/dashboard");
+  }
+
   return (
     <div className="relative flex min-h-screen flex-col justify-center py-16">
       <div className="mx-auto grid w-full max-w-md gap-6 px-6">
@@ -18,13 +25,16 @@ const SignIn: NextPageWithLayout = () => {
           </p>
         </div>
 
-        <SignInForm />
+        <Suspense fallback="Loading...">
+          <SignInForm />
+        </Suspense>
 
         <p className="px-8 text-center text-sm text-muted-foreground">
           By clicking continue, you agree to our{" "}
           <Link
             href="/terms"
             className="underline underline-offset-4 hover:text-primary"
+            prefetch={false}
           >
             Terms of Service
           </Link>{" "}
@@ -32,6 +42,7 @@ const SignIn: NextPageWithLayout = () => {
           <Link
             href="/privacy"
             className="underline underline-offset-4 hover:text-primary"
+            prefetch={false}
           >
             Privacy Policy
           </Link>
@@ -40,25 +51,4 @@ const SignIn: NextPageWithLayout = () => {
       </div>
     </div>
   );
-};
-
-export default SignIn;
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const session = await getServerAuthSession(ctx);
-
-  if (session) {
-    return {
-      redirect: {
-        destination: "/dashboard",
-        statusCode: 307,
-      },
-    };
-  }
-
-  return {
-    props: {
-      session,
-    },
-  };
-};
+}
