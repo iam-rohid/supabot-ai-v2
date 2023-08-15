@@ -1,35 +1,11 @@
-import { Button } from "@/components/ui/button";
-import { ChevronRight, GithubIcon } from "lucide-react";
-import Link from "next/link";
+import Chatbox from "./chatbox";
+import Hero from "./hero";
 
 export default function Page() {
   return (
-    <main>
-      <section className="my-32">
-        <div className="mx-auto max-w-2xl text-center">
-          <h1 className="bg-gradient-to-br from-accent-foreground to-muted-foreground bg-clip-text text-6xl font-bold leading-none text-transparent">
-            Integrate ChatGPT on your Site with Ease
-          </h1>
-          <p className="mt-8 text-xl leading-snug text-muted-foreground">
-            Lorem ipsum, dolor sit amet consectetur adipisicing elit. Maxime,
-            iure exercitationem blanditiis ipsa vero consequuntur.
-          </p>
-          <div className="mt-16 flex items-center justify-center gap-4">
-            <Button asChild size="lg">
-              <Link href="/signin" prefetch={false}>
-                Start for Free
-                <ChevronRight className="-mr-1 ml-2 h-5 w-5" />
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="lg">
-              <Link href="/signin" prefetch={false}>
-                <GithubIcon className="-ml-1 mr-2 h-5 w-5" />
-                Star on Github
-              </Link>
-            </Button>
-          </div>
-        </div>
-      </section>
+    <main className="py-16">
+      <Hero />
+      <Chatbox />
     </main>
   );
 }

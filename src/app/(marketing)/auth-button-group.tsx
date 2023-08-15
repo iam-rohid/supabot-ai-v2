@@ -27,9 +27,7 @@ export default function AuthButtonGroup() {
   return (
     <div className="space-x-2">
       <Button variant="ghost" asChild>
-        <Link href="/signin" prefetch={false}>
-          Sign In
-        </Link>
+        <Link href="/signin">Sign In</Link>
       </Button>
       <Button asChild>
         <Link
@@ -39,7 +37,6 @@ export default function AuthButtonGroup() {
               next: "/pricing",
             }).toString(),
           }}
-          prefetch={false}
         >
           Get Started
         </Link>

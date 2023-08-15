@@ -1,3 +1,4 @@
+import Logo from "@/components/logo";
 import ProjectSwitcher from "@/components/project-switcher";
 import ThemeSwitcher from "@/components/theme-switcher";
 import { Button } from "@/components/ui/button";
@@ -34,7 +35,7 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
         <div className="container flex h-16 items-center justify-between">
           <Button variant="ghost" size="icon" className="rounded-full" asChild>
             <Link href="/dashboard">
-              <div className="h-10 w-10 rounded-full bg-accent-foreground" />
+              <Logo className="text-5xl" />
             </Link>
           </Button>
           <div className="mx-4 h-6 w-px rotate-12 bg-border" />
