@@ -8,8 +8,15 @@ import "@/styles/globals.css";
 import Color from "color";
 import { BASE_URL, APP_NAME } from "@/utils/constants";
 import Link from "next/link";
+import { type Metadata } from "next";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/server/auth";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: APP_NAME,
+};
 
 function getTailwindVarFromColor(color: Color) {
   return color
@@ -27,6 +34,7 @@ export default async function Layout({
   children: ReactNode;
   params: { projectId: string };
 }) {
+  const session = await getServerSession(authOptions);
   const project = await getProjectById(projectId);
   if (!project) notFound();
 
@@ -48,7 +56,7 @@ export default async function Layout({
         </style>
       </head>
       <body className={cn(inter.className, "flex h-screen w-screen flex-col")}>
-        <Providers>
+        <Providers session={session}>
           {children}
           <div className="flex items-center justify-center border-t bg-card p-2">
             <p className="text-sm text-muted-foreground">

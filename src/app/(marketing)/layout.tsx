@@ -7,8 +7,14 @@ import FullLogo from "@/components/full-logo";
 import Providers from "../providers";
 import { Inter } from "next/font/google";
 import "@/styles/globals.css";
+import { type Metadata } from "next";
+import { APP_NAME } from "@/utils/constants";
 
 const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: APP_NAME,
+};
 
 export default function Layout({ children }: { children: ReactNode }) {
   return (
