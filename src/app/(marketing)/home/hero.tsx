@@ -12,12 +12,12 @@ export default function Hero() {
             &ldquo;Your Website&rdquo;
           </span>
         </h1>
-        <p className="mt-8 text-lg font-medium leading-normal text-muted-foreground">
+        <p className="mt-6 text-lg font-medium leading-normal text-muted-foreground">
           Answer user questions effortlessly with our Chatbot powered by GPT,
           specifically trained on your website&apos;s data, eliminating the need
           for a support team.
         </p>
-        <div className="mt-16 flex items-center justify-center gap-4">
+        <div className="mt-12 flex items-center justify-center gap-4">
           <Button asChild size="lg">
             <Link href="/signin">
               Start for Free

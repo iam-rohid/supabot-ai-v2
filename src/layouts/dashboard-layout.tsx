@@ -33,11 +33,9 @@ const DashboardLayout = ({ children }: { children: ReactNode }) => {
     <ThemeProvider defaultTheme="system" attribute="class" enableSystem>
       <header className="sticky top-0 z-20 border-b bg-card text-card-foreground">
         <div className="container flex h-16 items-center justify-between">
-          <Button variant="ghost" size="icon" className="rounded-full" asChild>
-            <Link href="/dashboard">
-              <Logo className="text-5xl" />
-            </Link>
-          </Button>
+          <Link href="/dashboard">
+            <Logo className="h-10 w-10" />
+          </Link>
           <div className="mx-4 h-6 w-px rotate-12 bg-border" />
           <ProjectSwitcher />
           <div className="flex flex-1 items-center justify-end gap-4">

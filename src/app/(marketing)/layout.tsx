@@ -21,19 +21,19 @@ export default function Layout({ children }: { children: ReactNode }) {
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <header className="sticky top-0 bg-card text-card-foreground">
+          <header className="sticky top-0 z-20 border-b bg-card text-card-foreground">
             <div className="container flex h-16 items-center justify-between">
               <div className="flex flex-1 items-center">
                 <Link
                   href="/home"
                   className="w-fit text-xl font-bold text-accent-foreground"
                 >
-                  <FullLogo className="text-2xl" />
+                  <FullLogo className="h-8" />
                 </Link>
               </div>
               <nav className="flex items-center gap-8 max-md:hidden">
                 <NavLink
-                  className="text-sm font-medium"
+                  className="font-medium"
                   inactiveClassName="text-muted-foreground hover:text-accent-foreground"
                   activeClassName="text-accent-foreground"
                   href="/about"
@@ -41,7 +41,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   About
                 </NavLink>
                 <NavLink
-                  className="text-sm font-medium"
+                  className="font-medium"
                   inactiveClassName="text-muted-foreground hover:text-accent-foreground"
                   activeClassName="text-accent-foreground"
                   href="/blog"
@@ -49,7 +49,7 @@ export default function Layout({ children }: { children: ReactNode }) {
                   Blog
                 </NavLink>
                 <NavLink
-                  className="text-sm font-medium"
+                  className="font-medium"
                   inactiveClassName="text-muted-foreground hover:text-accent-foreground"
                   activeClassName="text-accent-foreground"
                   href="/pricing"
