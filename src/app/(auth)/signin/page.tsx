@@ -34,7 +34,6 @@ export default async function Page() {
           <Link
             href="/terms"
             className="underline underline-offset-4 hover:text-primary"
-            prefetch={false}
           >
             Terms of Service
           </Link>{" "}
@@ -42,7 +41,6 @@ export default async function Page() {
           <Link
             href="/privacy"
             className="underline underline-offset-4 hover:text-primary"
-            prefetch={false}
           >
             Privacy Policy
           </Link>

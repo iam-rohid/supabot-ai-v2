@@ -1,31 +1,15 @@
-import Providers from "@/app/providers";
 import { type ReactNode } from "react";
-import { Inter } from "next/font/google";
-import { cn } from "@/utils";
 import { getProjectById } from "@/server/models/project";
 import { notFound } from "next/navigation";
 import "@/styles/globals.css";
-import Color from "color";
-import { BASE_URL, APP_NAME } from "@/utils/constants";
-import Link from "next/link";
+import { APP_NAME, BASE_URL } from "@/utils/constants";
 import { type Metadata } from "next";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/server/auth";
-
-const inter = Inter({ subsets: ["latin"] });
+import ChatboxWidgetProvider from "./chatbox-widget-provider";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: APP_NAME,
 };
-
-function getTailwindVarFromColor(color: Color) {
-  return color
-    .hsl()
-    .string()
-    .replace("hsl(", "")
-    .replaceAll(",", "")
-    .replace(")", "");
-}
 
 export default async function Layout({
   children,
@@ -34,44 +18,26 @@ export default async function Layout({
   children: ReactNode;
   params: { projectId: string };
 }) {
-  const session = await getServerSession(authOptions);
   const project = await getProjectById(projectId);
   if (!project) notFound();
 
-  const primary = new Color(project.theme.primary_color || "#6366F1");
-  const primaryForeground = new Color(primary.isLight() ? "#000" : "#fff");
-
   return (
-    <html lang="en">
-      <head>
-        <style>
-          {`
-          :root,
-          .dark {
-            --primary: ${getTailwindVarFromColor(primary)};
-            --primary-foreground: ${getTailwindVarFromColor(primaryForeground)};
-            --ring: ${getTailwindVarFromColor(primary)};
-          }
-          `}
-        </style>
-      </head>
-      <body className={cn(inter.className, "flex h-screen w-screen flex-col")}>
-        <Providers session={session}>
-          {children}
-          <div className="flex items-center justify-center border-t bg-card p-2">
-            <p className="text-sm text-muted-foreground">
-              Powered by{" "}
-              <Link
-                href={BASE_URL}
-                target="_blank"
-                className="font-medium text-foreground underline-offset-4 hover:underline"
-              >
-                {APP_NAME}
-              </Link>
-            </p>
-          </div>
-        </Providers>
-      </body>
-    </html>
+    <ChatboxWidgetProvider project={project}>
+      <div className="flex h-screen w-screen flex-col">
+        {children}
+        <div className="flex items-center justify-center border-t bg-card p-2">
+          <p className="text-sm text-muted-foreground">
+            Powered by{" "}
+            <Link
+              href={BASE_URL}
+              target="_blank"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              {APP_NAME}
+            </Link>
+          </p>
+        </div>
+      </div>
+    </ChatboxWidgetProvider>
   );
 }
