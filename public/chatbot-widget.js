@@ -52,7 +52,7 @@
 
   const iframe = document.createElement("iframe");
   iframe.id = IFRAME_ID;
-  iframe.src = `${baseUrl}/widget/chatbot/${s.dataset.id}`;
+  iframe.src = `${baseUrl}/widget/chatbox/${s.dataset.id}`;
   iframe.style.position = "fixed";
   iframe.style.transition = "opacity 0.3s ease, transform 0.3s ease";
   iframe.style.width = "100%";

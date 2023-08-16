@@ -1,33 +1,15 @@
 import { getProjectById } from "@/server/models/project";
 import Image from "next/image";
+import StartConversationButton from "./start-conversation-button";
 import { notFound } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { ArrowRight } from "lucide-react";
 
 export default async function Page({
-  params: { pid },
+  params: { projectId },
 }: {
-  params: { pid: string };
+  params: { projectId: string };
 }) {
-  const project = await getProjectById(pid);
-  if (!project) {
-    notFound();
-  }
-
-  // const startConversation = async () => {
-  //   "use server";
-  //   console.log(project);
-  //   const [chat] = await db
-  //     .insert(chatsTable)
-  //     .values({ projectId: project.id })
-  //     .returning({ id: chatsTable.id });
-
-  //   if (!chat) {
-  //     throw "Failed to create a conversation";
-  //   }
-
-  //   redirect(`/widget/c/${project.id}/${chat.id}`);
-  // };
+  const project = await getProjectById(projectId);
+  if (!project) notFound();
 
   return (
     <>
@@ -53,12 +35,7 @@ export default async function Page({
           </p>
         )}
         <div className="mt-8">
-          {/* <form action={startConversation}> */}
-          <Button type="submit">
-            Start a Conversation
-            <ArrowRight className="-mr-1 ml-2 h-4 w-4" />
-          </Button>
-          {/* </form> */}
+          <StartConversationButton projectId={project.id} />
         </div>
       </div>
     </>
