@@ -65,3 +65,15 @@
     @apply px-4 lg:px-20;
   }
 }
+
+.progress-bar {
+  transform: translateX(-100%);
+  animation: shimmer 2s ease-out infinite;
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(0);
+    opacity: 0;
+  }
+}

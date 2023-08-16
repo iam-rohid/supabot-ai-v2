@@ -7,6 +7,7 @@ import { cn } from "@/utils";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/server/auth";
 import Providers from "./providers";
+import ProgressBar from "./progessbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -19,6 +20,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   return (
     <html lang="en">
       <body className={cn(inter.className, "flex min-h-screen flex-col")}>
+        <ProgressBar />
         <Providers session={session}>{children}</Providers>
       </body>
     </html>
